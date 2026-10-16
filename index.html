@@ -1,1 +1,541 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Aura Notes</title>
 
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Стили и библиотеки -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+  <!-- Firebase SDK (Compat версии для быстрого запуска без сборщиков) -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
+          colors: {
+            brand: { 500: '#6366f1', 600: '#4f46e5', 700: '#4338ca' }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    .glass-panel {
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+
+    .prose-custom h1 { font-size: 1.75rem; font-weight: 700; margin: 1rem 0 0.5rem; }
+    .prose-custom h2 { font-size: 1.4rem; font-weight: 600; margin: 0.8rem 0 0.4rem; }
+    .prose-custom p { margin-bottom: 0.75rem; line-height: 1.65; }
+    .prose-custom ul { list-style: disc; margin-left: 1.25rem; margin-bottom: 0.75rem; }
+    .prose-custom ol { list-style: decimal; margin-left: 1.25rem; margin-bottom: 0.75rem; }
+    .prose-custom code { background: rgba(99, 102, 241, 0.1); color: #6366f1; padding: 0.2rem 0.4rem; border-radius: 6px; font-size: 0.9em; }
+    .prose-custom pre { background: #1e1e2e; color: #cdd6f4; padding: 1rem; border-radius: 12px; overflow-x: auto; margin-bottom: 1rem; }
+    .prose-custom blockquote { border-left: 4px solid #6366f1; padding-left: 1rem; opacity: 0.85; font-style: italic; }
+  </style>
+</head>
+<body class="bg-slate-50 dark:bg-[#0b0f19] text-slate-800 dark:text-slate-100 min-h-screen flex flex-col font-sans transition-colors duration-300">
+
+  <div class="flex-1 flex h-screen overflow-hidden">
+
+    <!-- Левая панель / Список заметок -->
+    <aside id="sidebar" class="w-full md:w-84 lg:w-96 flex flex-col bg-white/70 dark:bg-slate-900/60 glass-panel border-r border-slate-200/80 dark:border-slate-800/80 z-20 flex-shrink-0 transition-transform">
+      
+      <!-- Верхняя панель профиля и шапка -->
+      <div class="p-4 border-b border-slate-200/60 dark:border-slate-800/60 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-500 to-violet-500 flex items-center justify-center text-white shadow-md shadow-indigo-500/20">
+            <i data-lucide="sparkles" class="w-4 h-4"></i>
+          </div>
+          <span class="font-bold tracking-tight text-lg">Aura Notes</span>
+        </div>
+
+        <div class="flex items-center gap-1.5">
+          <button id="themeBtn" class="p-2 rounded-xl text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition" title="Тема">
+            <i data-lucide="moon" class="w-4 h-4"></i>
+          </button>
+          <button id="authModalBtn" class="flex items-center gap-1.5 p-1.5 pr-2.5 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-medium transition">
+            <div id="userAvatar" class="w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center overflow-hidden">
+              <i data-lucide="user" class="w-3.5 h-3.5 text-slate-500"></i>
+            </div>
+            <span id="userName" class="truncate max-w-[80px]">Войти</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Поиск и создание -->
+      <div class="p-4 space-y-3">
+        <div class="flex gap-2">
+          <div class="relative flex-1">
+            <i data-lucide="search" class="w-4 h-4 absolute left-3 top-3 text-slate-400"></i>
+            <input type="text" id="searchInput" placeholder="Поиск заметок..." 
+                   class="w-full pl-9 pr-3 py-2 bg-slate-100/80 dark:bg-slate-800/50 rounded-xl text-sm border border-transparent focus:border-indigo-500/30 focus:bg-white dark:focus:bg-slate-900 focus:outline-none transition">
+          </div>
+          <button id="createNoteBtn" class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-medium shadow-sm transition flex items-center gap-1 text-sm">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+          </button>
+        </div>
+
+        <!-- Фильтр тегов -->
+        <div id="tagsList" class="flex gap-1.5 overflow-x-auto no-scrollbar py-0.5 text-xs">
+          <button class="tag-chip active px-3 py-1 rounded-full bg-indigo-600 text-white font-medium" data-tag="all">Все</button>
+        </div>
+      </div>
+
+      <!-- Карточки заметок -->
+      <div id="notesContainer" class="flex-1 overflow-y-auto px-3 space-y-1.5 no-scrollbar pb-4"></div>
+
+      <!-- Статус синхронизации в подвале -->
+      <div class="p-3.5 border-t border-slate-200/60 dark:border-slate-800/60 flex items-center justify-between text-xs text-slate-400">
+        <div class="flex items-center gap-1.5" id="syncStatus">
+          <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+          <span>Локальный режим</span>
+        </div>
+        <span id="notesCount">0 заметок</span>
+      </div>
+    </aside>
+
+    <!-- Основная зона редактора -->
+    <main id="editorWrapper" class="flex-1 flex flex-col bg-white dark:bg-[#0e1320] hidden md:flex h-full overflow-hidden relative">
+      <!-- Панель инструментов редактора -->
+      <header class="h-16 border-b border-slate-100 dark:border-slate-800/80 px-4 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <button id="backBtn" class="md:hidden p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600">
+            <i data-lucide="arrow-left" class="w-5 h-5"></i>
+          </button>
+          
+          <div class="flex p-0.5 bg-slate-100 dark:bg-slate-800/80 rounded-xl text-xs font-medium">
+            <button id="tabEdit" class="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-700 shadow-sm transition">Редактор</button>
+            <button id="tabPreview" class="px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-800 dark:hover:text-white transition">Просмотр</button>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-1 text-slate-500">
+          <button id="pinToggle" class="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition" title="Закрепить">
+            <i data-lucide="pin" class="w-4 h-4"></i>
+          </button>
+          <button id="deleteNote" class="p-2 rounded-xl hover:bg-red-50 dark:hover:bg-red-950/30 text-rose-500 transition" title="Удалить">
+            <i data-lucide="trash-2" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </header>
+
+      <!-- Заголовок и метаданные -->
+      <div class="px-6 pt-5 pb-2">
+        <input type="text" id="noteTitle" placeholder="Заголовок..." 
+               class="w-full text-2xl font-bold bg-transparent outline-none placeholder:text-slate-300 dark:placeholder:text-slate-600">
+        <input type="text" id="noteTags" placeholder="Теги через запятую (например: идеи, проекты)..." 
+               class="w-full mt-2 text-xs font-medium text-indigo-600 dark:text-indigo-400 bg-transparent outline-none placeholder:text-slate-400">
+      </div>
+
+      <!-- Рабочая область -->
+      <div class="flex-1 overflow-hidden relative p-6">
+        <textarea id="noteContent" placeholder="Начните писать..." 
+                  class="w-full h-full bg-transparent outline-none resize-none font-mono text-sm leading-relaxed no-scrollbar text-slate-700 dark:text-slate-300"></textarea>
+        
+        <div id="previewArea" class="prose-custom max-w-none w-full h-full overflow-y-auto hidden text-slate-800 dark:text-slate-200"></div>
+      </div>
+    </main>
+
+  </div>
+
+  <!-- Модальное окно авторизации (Google & Facebook) -->
+  <div id="authModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-md p-6 shadow-2xl relative">
+      <button id="closeAuthModal" class="absolute right-4 top-4 text-slate-400 hover:text-slate-600">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div class="text-center mb-6">
+        <h3 class="text-xl font-bold">Синхронизация данных</h3>
+        <p class="text-xs text-slate-500 mt-1">Войдите, чтобы открывать ваши заметки на любом компьютере и телефоне.</p>
+      </div>
+
+      <div id="authActions" class="space-y-3">
+        <button id="loginGoogle" class="w-full py-2.5 px-4 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 font-medium text-sm flex items-center justify-center gap-2.5 transition">
+          <svg class="w-4 h-4" viewBox="0 0 24 24"><path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.34 24 12 24z"/><path fill="#FBBC05" d="M5.28 14.27a7.18 7.18 0 0 1 0-4.54V6.58H1.25a11.96 11.96 0 0 0 0 10.84l4.03-3.15z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/></svg>
+          Продолжить с Google
+        </button>
+
+        <button id="loginFacebook" class="w-full py-2.5 px-4 rounded-xl bg-[#1877F2] hover:bg-[#166fe5] text-white font-medium text-sm flex items-center justify-center gap-2.5 transition shadow-sm">
+          <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+          Продолжить с Facebook
+        </button>
+      </div>
+
+      <div id="userInfo" class="hidden text-center space-y-4">
+        <p class="text-sm font-medium">Вы вошли как <span id="userEmail" class="text-indigo-600"></span></p>
+        <button id="logoutBtn" class="w-full py-2 rounded-xl border border-red-200 text-rose-500 hover:bg-rose-50 text-xs font-semibold transition">
+          Выйти из аккаунта
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ==========================================
+    // 1. КОНФИГУРАЦИЯ FIREBASE
+    // Замените эти параметры на данные вашего проекта из консоли Firebase:
+    // https://console.firebase.google.com/
+    // ==========================================
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT_ID.appspot.com",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+
+    let auth = null, db = null, currentUser = null;
+    const isConfigured = firebaseConfig.apiKey !== "YOUR_API_KEY";
+
+    if (isConfigured) {
+      firebase.initializeApp(firebaseConfig);
+      auth = firebase.auth();
+      db = firebase.firestore();
+    }
+
+    // --- Состояние заметок ---
+    let notes = JSON.parse(localStorage.getItem('aura_notes_data')) || [
+      {
+        id: '1',
+        title: 'Добро пожаловать в обновленный сервис!',
+        content: '# Свежий дизайн Aura\n\n- Улучшенный Glassmorphism интерфейс\n- Встроенная синхронизация через Google и Facebook\n- Markdown-редактор с предпросмотром',
+        tags: ['обновление', 'инфо'],
+        pinned: true,
+        updatedAt: new Date().toISOString()
+      }
+    ];
+
+    let currentId = notes[0]?.id || null;
+    let currentTag = 'all';
+    let searchQuery = '';
+
+    // --- Инициализация ---
+    window.addEventListener('DOMContentLoaded', () => {
+      initTheme();
+      renderTags();
+      renderNotesList();
+      loadActiveNote();
+      lucide.createIcons();
+
+      if (isConfigured && auth) {
+        auth.onAuthStateChanged(user => {
+          currentUser = user;
+          updateAuthUI(user);
+          if (user) {
+            setupRealtimeSync(user.uid);
+          }
+        });
+      }
+    });
+
+    // --- Синхронизация Firestore ---
+    function setupRealtimeSync(userId) {
+      document.getElementById('syncStatus').innerHTML = `
+        <span class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
+        <span>Синхронизировано (Облако)</span>
+      `;
+
+      db.collection('users').doc(userId).collection('notes')
+        .onSnapshot(snapshot => {
+          if (!snapshot.empty) {
+            notes = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            localStorage.setItem('aura_notes_data', JSON.stringify(notes));
+            renderTags();
+            renderNotesList();
+            loadActiveNote();
+          }
+        });
+    }
+
+    async function syncNoteToCloud(note) {
+      if (!currentUser || !db) return;
+      try {
+        await db.collection('users').doc(currentUser.uid).collection('notes').doc(note.id).set(note);
+      } catch (e) {
+        console.error('Ошибка сохранения в облако:', e);
+      }
+    }
+
+    async function deleteNoteFromCloud(id) {
+      if (!currentUser || !db) return;
+      try {
+        await db.collection('users').doc(currentUser.uid).collection('notes').doc(id).delete();
+      } catch (e) {
+        console.error('Ошибка удаления из облака:', e);
+      }
+    }
+
+    function saveLocal() {
+      localStorage.setItem('aura_notes_data', JSON.stringify(notes));
+      renderTags();
+      renderNotesList();
+    }
+
+    // --- Отрисовка списка ---
+    function renderNotesList() {
+      const container = document.getElementById('notesContainer');
+      const filtered = notes.filter(n => {
+        const matchesTag = currentTag === 'all' || (n.tags && n.tags.includes(currentTag));
+        const matchesSearch = n.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+                              n.content.toLowerCase().includes(searchQuery.toLowerCase());
+        return matchesTag && matchesSearch;
+      }).sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0) || new Date(b.updatedAt) - new Date(a.updatedAt));
+
+      document.getElementById('notesCount').textContent = `${notes.length} заметок`;
+
+      container.innerHTML = filtered.map(note => `
+        <div onclick="selectNote('${note.id}')" 
+             class="group p-3.5 rounded-xl cursor-pointer transition-all border ${note.id === currentId 
+               ? 'bg-indigo-50/80 dark:bg-slate-800/80 border-indigo-200 dark:border-indigo-900/60 shadow-sm' 
+               : 'bg-white/40 dark:bg-slate-800/30 border-transparent hover:border-slate-200 dark:hover:border-slate-800'}">
+          <div class="flex items-center justify-between">
+            <h4 class="font-semibold text-sm truncate flex-1">${note.title || 'Без названия'}</h4>
+            ${note.pinned ? '<i data-lucide="pin" class="w-3.5 h-3.5 text-indigo-500 fill-indigo-500 ml-1"></i>' : ''}
+          </div>
+          <p class="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 mt-1 font-normal">${note.content.replace(/[#*`]/g, '') || 'Пустая заметка...'}</p>
+          <div class="flex items-center gap-1.5 mt-2.5 flex-wrap">
+            ${(note.tags || []).map(t => `<span class="text-[10px] bg-slate-100 dark:bg-slate-700/60 text-slate-500 dark:text-slate-400 px-2 py-0.5 rounded-md font-medium">#${t}</span>`).join('')}
+          </div>
+        </div>
+      `).join('');
+
+      lucide.createIcons();
+    }
+
+    function renderTags() {
+      const tags = ['all', ...new Set(notes.flatMap(n => n.tags || []))];
+      const container = document.getElementById('tagsList');
+      container.innerHTML = tags.map(t => `
+        <button onclick="setFilterTag('${t}')" class="px-3 py-1 rounded-full whitespace-nowrap text-xs transition ${currentTag === t ? 'bg-indigo-600 text-white font-medium' : 'bg-slate-100 dark:bg-slate-800/60 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800'}">
+          ${t === 'all' ? 'Все' : '#' + t}
+        </button>
+      `).join('');
+    }
+
+    function setFilterTag(tag) {
+      currentTag = tag;
+      renderTags();
+      renderNotesList();
+    }
+
+    function selectNote(id) {
+      currentId = id;
+      loadActiveNote();
+      renderNotesList();
+      if (window.innerWidth < 768) {
+        document.getElementById('sidebar').classList.add('hidden');
+        document.getElementById('editorWrapper').classList.remove('hidden');
+      }
+    }
+
+    function loadActiveNote() {
+      const note = notes.find(n => n.id === currentId);
+      const title = document.getElementById('noteTitle');
+      const content = document.getElementById('noteContent');
+      const tags = document.getElementById('noteTags');
+      const pinBtn = document.getElementById('pinToggle');
+
+      if (!note) {
+        title.value = ''; content.value = ''; tags.value = '';
+        return;
+      }
+
+      title.value = note.title;
+      content.value = note.content;
+      tags.value = (note.tags || []).join(', ');
+
+      if (note.pinned) {
+        pinBtn.classList.add('text-indigo-600');
+      } else {
+        pinBtn.classList.remove('text-indigo-600');
+      }
+
+      updatePreview();
+    }
+
+    function handleInput() {
+      const note = notes.find(n => n.id === currentId);
+      if (!note) return;
+
+      note.title = document.getElementById('noteTitle').value;
+      note.content = document.getElementById('noteContent').value;
+      note.tags = document.getElementById('noteTags').value.split(',').map(t => t.trim().toLowerCase()).filter(Boolean);
+      note.updatedAt = new Date().toISOString();
+
+      saveLocal();
+      syncNoteToCloud(note);
+      updatePreview();
+    }
+
+    document.getElementById('noteTitle').addEventListener('input', handleInput);
+    document.getElementById('noteContent').addEventListener('input', handleInput);
+    document.getElementById('noteTags').addEventListener('input', handleInput);
+
+    // Создание заметки
+    document.getElementById('createNoteBtn').addEventListener('click', () => {
+      const newNote = {
+        id: String(Date.now()),
+        title: '',
+        content: '',
+        tags: [],
+        pinned: false,
+        updatedAt: new Date().toISOString()
+      };
+      notes.unshift(newNote);
+      currentId = newNote.id;
+      saveLocal();
+      syncNoteToCloud(newNote);
+      loadActiveNote();
+      if (window.innerWidth < 768) {
+        document.getElementById('sidebar').classList.add('hidden');
+        document.getElementById('editorWrapper').classList.remove('hidden');
+      }
+      document.getElementById('noteTitle').focus();
+    });
+
+    // Удаление
+    document.getElementById('deleteNote').addEventListener('click', () => {
+      if (!currentId) return;
+      if (confirm('Удалить эту заметку?')) {
+        const idToDelete = currentId;
+        notes = notes.filter(n => n.id !== idToDelete);
+        currentId = notes[0]?.id || null;
+        saveLocal();
+        deleteNoteFromCloud(idToDelete);
+        loadActiveNote();
+        if (window.innerWidth < 768) {
+          document.getElementById('sidebar').classList.remove('hidden');
+          document.getElementById('editorWrapper').classList.add('hidden');
+        }
+      }
+    });
+
+    // Закрепление
+    document.getElementById('pinToggle').addEventListener('click', () => {
+      const note = notes.find(n => n.id === currentId);
+      if (!note) return;
+      note.pinned = !note.pinned;
+      saveLocal();
+      syncNoteToCloud(note);
+      loadActiveNote();
+    });
+
+    // Переключение режимов Редактор / Просмотр
+    const tabEdit = document.getElementById('tabEdit');
+    const tabPreview = document.getElementById('tabPreview');
+    const noteText = document.getElementById('noteContent');
+    const previewArea = document.getElementById('previewArea');
+
+    function updatePreview() {
+      previewArea.innerHTML = marked.parse(noteText.value || '*Пусто...*');
+    }
+
+    tabEdit.addEventListener('click', () => {
+      tabEdit.classList.add('bg-white', 'dark:bg-slate-700', 'shadow-sm');
+      tabEdit.classList.remove('text-slate-500');
+      tabPreview.classList.remove('bg-white', 'dark:bg-slate-700', 'shadow-sm');
+      tabPreview.classList.add('text-slate-500');
+      noteText.classList.remove('hidden');
+      previewArea.classList.add('hidden');
+    });
+
+    tabPreview.addEventListener('click', () => {
+      tabPreview.classList.add('bg-white', 'dark:bg-slate-700', 'shadow-sm');
+      tabPreview.classList.remove('text-slate-500');
+      tabEdit.classList.remove('bg-white', 'dark:bg-slate-700', 'shadow-sm');
+      tabEdit.classList.add('text-slate-500');
+      updatePreview();
+      noteText.classList.add('hidden');
+      previewArea.classList.remove('hidden');
+    });
+
+    document.getElementById('backBtn').addEventListener('click', () => {
+      document.getElementById('sidebar').classList.remove('hidden');
+      document.getElementById('editorWrapper').classList.add('hidden');
+    });
+
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+      searchQuery = e.target.value;
+      renderNotesList();
+    });
+
+    // Тема
+    function initTheme() {
+      if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+      }
+    }
+
+    document.getElementById('themeBtn').addEventListener('click', () => {
+      document.documentElement.classList.toggle('dark');
+      localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+    });
+
+    // --- Авторизация (Google & Facebook) ---
+    const authModal = document.getElementById('authModal');
+    document.getElementById('authModalBtn').addEventListener('click', () => authModal.classList.remove('hidden'));
+    document.getElementById('closeAuthModal').addEventListener('click', () => authModal.classList.add('hidden'));
+
+    function updateAuthUI(user) {
+      const nameElem = document.getElementById('userName');
+      const avatarElem = document.getElementById('userAvatar');
+      const authActions = document.getElementById('authActions');
+      const userInfo = document.getElementById('userInfo');
+
+      if (user) {
+        nameElem.textContent = user.displayName?.split(' ')[0] || 'Аккаунт';
+        if (user.photoURL) {
+          avatarElem.innerHTML = `<img src="${user.photoURL}" class="w-full h-full object-cover">`;
+        }
+        authActions.classList.add('hidden');
+        userInfo.classList.remove('hidden');
+        document.getElementById('userEmail').textContent = user.email || user.displayName;
+      } else {
+        nameElem.textContent = 'Войти';
+        avatarElem.innerHTML = `<i data-lucide="user" class="w-3.5 h-3.5 text-slate-500"></i>`;
+        authActions.classList.remove('hidden');
+        userInfo.classList.add('hidden');
+        lucide.createIcons();
+      }
+    }
+
+    document.getElementById('loginGoogle').addEventListener('click', () => {
+      if (!isConfigured) return alert('Пожалуйста, укажите конфигурацию Firebase в начале скрипта.');
+      const provider = new firebase.auth.GoogleAuthProvider();
+      auth.signInWithPopup(provider).then(() => authModal.classList.add('hidden')).catch(alert);
+    });
+
+    document.getElementById('loginFacebook').addEventListener('click', () => {
+      if (!isConfigured) return alert('Пожалуйста, укажите конфигурацию Firebase в начале скрипта.');
+      const provider = new firebase.auth.FacebookAuthProvider();
+      auth.signInWithPopup(provider).then(() => authModal.classList.add('hidden')).catch(alert);
+    });
+
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      if (auth) auth.signOut().then(() => authModal.classList.add('hidden'));
+    });
+  </script>
+</body>
+</html>
