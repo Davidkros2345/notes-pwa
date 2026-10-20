@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Aura Notes PRO 3.0 — AI, Диаграммы и Скетчи</title>
+  <title>Aura Notes PRO 3.1 — AI, Word, Диаграммы</title>
 
   <!-- Шрифты -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -14,7 +14,6 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-  <!-- Mermaid.js для рендера диаграмм и графиков -->
   <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 
   <!-- Firebase SDK -->
@@ -40,6 +39,12 @@
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
+    /* Аккуратный скроллбар для больших экранов */
+    .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+    .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.3); border-radius: 9999px; }
+    .custom-scroll::-webkit-scrollbar-thumb:hover { background: rgba(99, 102, 241, 0.6); }
+
     .glass-effect {
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
@@ -62,18 +67,18 @@
     .prose-custom td { padding: 0.6rem 0.85rem; border: 1px solid rgba(148, 163, 184, 0.2); }
     .prose-custom tr:nth-child(even) { background: rgba(148, 163, 184, 0.05); }
 
-    .mermaid { background: rgba(255,255,255,0.03); padding: 1rem; border-radius: 12px; display: flex; justify-content: center; margin: 1rem 0; }
+    .mermaid { background: rgba(255,255,255,0.03); padding: 1rem; border-radius: 12px; display: flex; justify-content: center; margin: 1rem 0; overflow-x: auto; }
   </style>
 </head>
-<body class="bg-slate-50 dark:bg-[#070b14] text-slate-800 dark:text-slate-100 min-h-screen flex flex-col font-sans transition-colors duration-300">
+<body class="bg-slate-50 dark:bg-[#070b14] text-slate-800 dark:text-slate-100 h-screen overflow-hidden flex flex-col font-sans transition-colors duration-300">
 
-  <div class="flex-1 flex h-screen overflow-hidden">
+  <div class="flex-1 flex h-full w-full overflow-hidden">
 
     <!-- Боковая панель -->
-    <aside id="sidebar" class="w-full md:w-80 lg:w-96 flex flex-col bg-white/80 dark:bg-[#0c1222]/80 glass-effect border-r border-slate-200/80 dark:border-slate-800/80 z-20 flex-shrink-0">
+    <aside id="sidebar" class="w-full md:w-80 lg:w-96 flex flex-col h-full bg-white/80 dark:bg-[#0c1222]/80 glass-effect border-r border-slate-200/80 dark:border-slate-800/80 z-20 flex-shrink-0">
       
       <!-- Шапка -->
-      <div class="p-4 border-b border-slate-200/60 dark:border-slate-800/60 flex items-center justify-between">
+      <div class="p-4 border-b border-slate-200/60 dark:border-slate-800/60 flex items-center justify-between flex-shrink-0">
         <div class="flex items-center gap-2.5">
           <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-500 via-indigo-600 to-violet-500 flex items-center justify-center text-white shadow-lg shadow-indigo-500/25">
             <i data-lucide="sparkles" class="w-5 h-5"></i>
@@ -81,7 +86,7 @@
           <div>
             <div class="flex items-center gap-1.5">
               <span class="font-extrabold tracking-tight text-lg">Aura</span>
-              <span class="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-white">v3.0</span>
+              <span class="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-white">v3.1</span>
             </div>
             <span class="text-[11px] text-slate-400 block -mt-1 font-medium">Visual Workspace</span>
           </div>
@@ -101,7 +106,7 @@
       </div>
 
       <!-- Поиск и создание -->
-      <div class="p-4 space-y-3">
+      <div class="p-4 space-y-3 flex-shrink-0">
         <div class="flex gap-2">
           <div class="relative flex-1">
             <i data-lucide="search" class="w-4 h-4 absolute left-3 top-3 text-slate-400"></i>
@@ -120,10 +125,10 @@
       </div>
 
       <!-- Список заметок -->
-      <div id="notesContainer" class="flex-1 overflow-y-auto px-3 space-y-2 no-scrollbar pb-3"></div>
+      <div id="notesContainer" class="flex-1 min-h-0 overflow-y-auto px-3 space-y-2 custom-scroll pb-3"></div>
 
       <!-- Подвал -->
-      <div class="p-3.5 border-t border-slate-200/60 dark:border-slate-800/60 flex items-center justify-between text-xs text-slate-400">
+      <div class="p-3.5 border-t border-slate-200/60 dark:border-slate-800/60 flex items-center justify-between text-xs text-slate-400 flex-shrink-0">
         <div class="flex items-center gap-1.5" id="syncStatus">
           <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
           <span>Локальный режим</span>
@@ -132,17 +137,17 @@
       </div>
     </aside>
 
-    <!-- Главная рабочая область -->
-    <main id="editorWrapper" class="flex-1 flex flex-col bg-white dark:bg-[#070b14] hidden md:flex h-full overflow-hidden relative">
+    <!-- Главная рабочая область (ИСПРАВЛЕНА ВЫСОТА И ПЕРЕПОЛНЕНИЕ НА БОЛЬШИХ ЭКРАНАХ) -->
+    <main id="editorWrapper" class="flex-1 flex flex-col bg-white dark:bg-[#070b14] hidden md:flex h-full min-w-0 min-h-0 overflow-hidden relative">
       
-      <!-- Верхняя панель: Режимы + Помодоро + Действия -->
-      <header class="h-16 border-b border-slate-100 dark:border-slate-800/70 px-4 lg:px-6 flex items-center justify-between gap-2 overflow-x-auto no-scrollbar">
+      <!-- Верхняя панель -->
+      <header class="h-16 border-b border-slate-100 dark:border-slate-800/70 px-4 lg:px-6 flex items-center justify-between gap-2 overflow-x-auto no-scrollbar flex-shrink-0">
         <div class="flex items-center gap-2">
           <button id="backBtn" class="md:hidden p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600">
             <i data-lucide="arrow-left" class="w-5 h-5"></i>
           </button>
           
-          <!-- Переключатель вида: Редактор / Сплит / Просмотр -->
+          <!-- Переключатель вида: Текст / 2 Окна / Превью -->
           <div class="flex p-0.5 bg-slate-100 dark:bg-slate-800/70 rounded-xl text-xs font-semibold">
             <button id="tabEdit" class="px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-700 shadow-sm transition">Текст</button>
             <button id="tabSplit" class="hidden lg:block px-2.5 py-1.5 rounded-lg text-slate-500 hover:text-slate-800 dark:hover:text-white transition">2 Окна</button>
@@ -157,7 +162,7 @@
           </div>
         </div>
 
-        <!-- Правые иконки действий -->
+        <!-- Правые иконки действий + ЭКСПОРТ В WORD -->
         <div class="flex items-center gap-1 text-slate-500">
           <!-- Выбор цвета карточки -->
           <div class="flex items-center gap-1 mr-2 border-r border-slate-200 dark:border-slate-800 pr-2">
@@ -167,6 +172,16 @@
             <button onclick="setNoteColor('amber')" class="w-3.5 h-3.5 rounded-full bg-amber-500" title="Желтый"></button>
             <button onclick="setNoteColor('rose')" class="w-3.5 h-3.5 rounded-full bg-rose-500" title="Красный"></button>
           </div>
+
+          <!-- Кнопка экспорта в Word -->
+          <button onclick="exportToWord()" class="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-blue-600/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 hover:bg-blue-600 hover:text-white transition text-xs font-bold mr-1" title="Скачать файл Microsoft Word (.doc)">
+            <i data-lucide="file-text" class="w-3.5 h-3.5"></i> Word
+          </button>
+
+          <!-- Кнопка экспорта в Markdown -->
+          <button onclick="exportToMd()" class="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition" title="Скачать .md">
+            <i data-lucide="download" class="w-4 h-4"></i>
+          </button>
 
           <button id="voiceBtn" class="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition" title="Голосовой ввод">
             <i data-lucide="mic" class="w-4 h-4"></i>
@@ -184,7 +199,7 @@
       </header>
 
       <!-- Панель вставки: Таблицы, Диаграммы, Картинки, Скетч, AI -->
-      <div class="px-6 py-2 bg-slate-50/70 dark:bg-slate-900/40 border-b border-slate-100 dark:border-slate-800/60 flex items-center gap-2 overflow-x-auto no-scrollbar text-xs font-semibold">
+      <div class="px-6 py-2 bg-slate-50/70 dark:bg-slate-900/40 border-b border-slate-100 dark:border-slate-800/60 flex items-center gap-2 overflow-x-auto no-scrollbar text-xs font-semibold flex-shrink-0">
         <button onclick="openTableModal()" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-indigo-500 transition shadow-sm whitespace-nowrap">
           <i data-lucide="table" class="w-3.5 h-3.5 text-indigo-500"></i> + Таблица
         </button>
@@ -205,10 +220,14 @@
         <button onclick="aiSummarize()" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 hover:bg-indigo-500/20 transition whitespace-nowrap">
           <i data-lucide="wand-2" class="w-3.5 h-3.5"></i> AI Чек-лист
         </button>
+
+        <button onclick="exportToWord()" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 hover:bg-blue-500/20 transition whitespace-nowrap">
+          <i data-lucide="file-down" class="w-3.5 h-3.5"></i> Скачать в Word (.doc)
+        </button>
       </div>
 
       <!-- Заголовок и метаданные -->
-      <div class="px-6 pt-5 pb-2">
+      <div class="px-6 pt-5 pb-2 flex-shrink-0">
         <input type="text" id="noteTitle" placeholder="Заголовок заметки..." 
                class="w-full text-2xl font-extrabold bg-transparent outline-none placeholder:text-slate-300 dark:placeholder:text-slate-700">
         <div class="flex items-center justify-between mt-2">
@@ -216,19 +235,21 @@
                  class="text-xs font-semibold text-indigo-600 dark:text-indigo-400 bg-transparent outline-none placeholder:text-slate-400 w-2/3">
           <div class="text-[11px] text-slate-400 flex items-center gap-2 font-medium">
             <span id="statsWords">0 слов</span>
+            <span>•</span>
+            <span id="statsChars">0 симв.</span>
           </div>
         </div>
       </div>
 
       <!-- Галерея прикрепленных картинок и скетчей -->
-      <div id="attachmentsBar" class="px-6 py-2 flex gap-3 overflow-x-auto no-scrollbar hidden border-b border-slate-100 dark:border-slate-800/50"></div>
+      <div id="attachmentsBar" class="px-6 py-2 flex gap-3 overflow-x-auto no-scrollbar hidden border-b border-slate-100 dark:border-slate-800/50 flex-shrink-0"></div>
 
-      <!-- Рабочая зона (Редактор + Превью с поддержкой Split Screen) -->
-      <div id="workspaceGrid" class="flex-1 grid grid-cols-1 overflow-hidden px-6 py-4 gap-6">
+      <!-- Рабочая зона: ИСПРАВЛЕНА ВЫСОТА И ПРОКРУТКА ТЕКСТА НА БОЛЬШИХ ЭКРАНАХ -->
+      <div id="workspaceGrid" class="flex-1 min-h-0 flex flex-col lg:flex-row overflow-hidden px-6 py-4 gap-6">
         <textarea id="noteContent" placeholder="Пишите текст, вставляйте таблицы и диаграммы..." 
-                  class="w-full h-full bg-transparent outline-none resize-none font-mono text-sm leading-relaxed no-scrollbar text-slate-700 dark:text-slate-300"></textarea>
+                  class="flex-1 w-full h-full min-h-0 bg-transparent outline-none resize-none font-mono text-sm leading-relaxed overflow-y-auto custom-scroll text-slate-700 dark:text-slate-300 pb-20"></textarea>
         
-        <div id="previewArea" class="prose-custom max-w-none w-full h-full overflow-y-auto hidden text-slate-800 dark:text-slate-200 border-l border-slate-200 dark:border-slate-800 pl-6"></div>
+        <div id="previewArea" class="flex-1 prose-custom max-w-none w-full h-full min-h-0 overflow-y-auto custom-scroll hidden text-slate-800 dark:text-slate-200 border-t lg:border-t-0 lg:border-l border-slate-200 dark:border-slate-800 pt-4 lg:pt-0 lg:pl-6 pb-20"></div>
       </div>
     </main>
   </div>
@@ -337,7 +358,6 @@
   </div>
 
   <script>
-    // Инициализация Mermaid для диаграмм
     mermaid.initialize({ startOnLoad: false, theme: 'dark' });
 
     // --- КОНФИГУРАЦИЯ FIREBASE ---
@@ -359,32 +379,48 @@
       db = firebase.firestore();
     }
 
-    // --- ДАННЫЕ ПО УМОЛЧАНИЮ (с примером таблицы и диаграммы) ---
-    let notes = JSON.parse(localStorage.getItem('aura_v3_notes')) || [
-      {
-        id: '1',
-        title: '🚀 Демо: Таблицы, Диаграммы и Картинки',
-        content: `Добро пожаловать в **Aura Notes 3.0**! Нажмите кнопку **«Превью»** или **«2 Окна»** сверху, чтобы увидеть живые таблицы и графики.\n\n### 📊 Пример таблицы расходов\n| Категория | Статус | Бюджет |\n| :--- | :--- | :--- |\n| Разработка | Готово | $1,200 |\n| Маркетинг | В процессе | $800 |\n| Дизайн | Ожидание | $450 |\n\n### 📈 Круговая диаграмма\n\`\`\`mermaid\npie title Распределение времени\n    "Код и архитектура" : 45\n    "Дизайн интерфейса" : 30\n    "Маркетинг и продажи" : 25\n\`\`\`\n\n### 🔀 Блок-схема проекта\n\`\`\`mermaid\ngraph LR\n    A[Идея продукта] --> B(Прототип PWA)\n    B --> C{Тесты}\n    C -->|Успех| D[Запуск продаж]\n    C -->|Правки| B\n\`\`\``,
-        tags: ['демо', 'аналитика'],
-        pinned: true,
-        locked: false,
-        color: 'indigo',
-        attachments: [],
-        updatedAt: new Date().toISOString()
-      }
-    ];
+    // --- АВТОМАТИЧЕСКОЕ ОБЪЕДИНЕНИЕ ЗАМЕТОК ИЗ ПРОШЛЫХ ВЕРСИЙ ---
+    function loadMergedNotes() {
+      const v3 = JSON.parse(localStorage.getItem('aura_v3_notes') || '[]');
+      const v2 = JSON.parse(localStorage.getItem('aura_notes_data') || '[]');
+      const v1 = JSON.parse(localStorage.getItem('notes_app_data') || '[]');
+      
+      const combined = [...v3, ...v2, ...v1];
+      const uniqueMap = new Map();
+      combined.forEach(item => {
+        if (item && item.id && !uniqueMap.has(item.id)) {
+          uniqueMap.set(item.id, item);
+        }
+      });
 
+      const result = Array.from(uniqueMap.values());
+      if (result.length > 0) return result;
+
+      return [
+        {
+          id: '1',
+          title: '🚀 Демо: Таблицы, Диаграммы и Экспорт в Word',
+          content: `Добро пожаловать в **Aura Notes 3.1**!\n\nТеперь весь длинный текст отлично прокручивается на любых мониторах, а сверху появилась кнопка **«Word»** для выгрузки документа в формате \`.doc\`.\n\n### 📊 Пример таблицы расходов\n| Категория | Статус | Бюджет |\n| :--- | :--- | :--- |\n| Разработка | Готово | $1,200 |\n| Маркетинг | В процессе | $800 |\n| Дизайн | Ожидание | $450 |\n\n### 📈 Круговая диаграмма\n\`\`\`mermaid\npie title Распределение времени\n    "Код и архитектура" : 45\n    "Дизайн интерфейса" : 30\n    "Маркетинг и продажи" : 25\n\`\`\`\n\n### 🔀 Блок-схема проекта\n\`\`\`mermaid\ngraph LR\n    A[Идея продукта] --> B(Прототип PWA)\n    B --> C{Тесты}\n    C -->|Успех| D[Запуск продаж]\n    C -->|Правки| B\n\`\`\``,
+          tags: ['демо', 'word'],
+          pinned: true,
+          locked: false,
+          color: 'indigo',
+          attachments: [],
+          updatedAt: new Date().toISOString()
+        }
+      ];
+    }
+
+    let notes = loadMergedNotes();
     let currentId = notes[0]?.id || null;
     let currentTag = 'all';
     let searchQuery = '';
-    let viewMode = 'edit'; // 'edit' | 'split' | 'preview'
 
     window.addEventListener('DOMContentLoaded', () => {
       if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
         document.documentElement.classList.add('dark');
       }
-      renderTags();
-      renderNotesList();
+      saveLocal();
       loadActiveNote();
       initSketchpad();
       lucide.createIcons();
@@ -397,6 +433,71 @@
         });
       }
     });
+
+    // --- ЭКСПОРТ В MICROSOFT WORD (.DOC) ---
+    function exportToWord() {
+      const note = notes.find(n => n.id === currentId);
+      if (!note) return alert('Сначала выберите заметку!');
+
+      // Конвертируем Markdown в чистый HTML для Word
+      const cleanMd = (note.content || '').replace(/```mermaid([\s\S]*?)```/g, '<p><em>[Диаграмма: $1]</em></p>');
+      const htmlBody = marked.parse(cleanMd);
+
+      // Добавляем прикрепленные картинки в конец документа Word
+      let imagesHtml = '';
+      if (note.attachments && note.attachments.length > 0) {
+        imagesHtml = '<h3>Прикрепленные изображения:</h3>' + note.attachments.map(src => `<p><img src="${src}" style="max-width:500px; border-radius:8px;" /></p>`).join('');
+      }
+
+      // Формируем полноценный документ с поддержкой кириллицы (UTF-8) и стилями таблиц для MS Word
+      const wordTemplate = `
+        <html xmlns:o='urn:schemas-microsoft-com:office:office' 
+              xmlns:w='urn:schemas-microsoft-com:office:word' 
+              xmlns='http://www.w3.org/TR/REC-html40'>
+        <head>
+          <meta charset="utf-8">
+          <title>${note.title || 'Заметка'}</title>
+          <style>
+            body { font-family: 'Arial', sans-serif; font-size: 12pt; color: #1e293b; line-height: 1.5; }
+            h1 { font-size: 20pt; color: #312e81; margin-bottom: 10pt; }
+            h2 { font-size: 16pt; color: #4338ca; margin-top: 14pt; }
+            h3 { font-size: 13pt; color: #4f46e5; }
+            table { border-collapse: collapse; width: 100%; margin: 12pt 0; }
+            th, td { border: 1px solid #94a3b8; padding: 6pt 10pt; text-align: left; }
+            th { background-color: #eef2ff; font-weight: bold; }
+            blockquote { border-left: 4px solid #6366f1; padding-left: 10pt; color: #475569; font-style: italic; }
+            code, pre { font-family: 'Courier New', monospace; background-color: #f1f5f9; padding: 4pt; }
+            .tags { font-size: 10pt; color: #6366f1; margin-bottom: 15pt; }
+          </style>
+        </head>
+        <body>
+          <h1>${note.title || 'Без названия'}</h1>
+          ${note.tags && note.tags.length ? `<div class="tags">Теги: #${note.tags.join(' #')}</div>` : ''}
+          <div>${htmlBody}</div>${imagesHtml}
+        </body>
+        </html>
+      `;
+
+      const blob = new Blob(['\ufeff', wordTemplate], { type: 'application/msword;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${(note.title || 'Заметка').replace(/[\\/:*?"<>|]/g, '_')}.doc`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    // --- ЭКСПОРТ В MARKDOWN (.MD) ---
+    function exportToMd() {
+      const note = notes.find(n => n.id === currentId);
+      if (!note) return;
+      const blob = new Blob([note.content], { type: 'text/markdown;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `${note.title || 'note'}.md`;
+      a.click();
+    }
 
     // --- СИНХРОНИЗАЦИЯ ---
     function setupRealtimeSync(uid) {
@@ -447,7 +548,7 @@
       const container = document.getElementById('notesContainer');
       const filtered = notes.filter(n => {
         const matchesTag = currentTag === 'all' || (n.tags && n.tags.includes(currentTag));
-        const matchesSearch = n.title.toLowerCase().includes(searchQuery.toLowerCase()) || n.content.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesSearch = (n.title || '').toLowerCase().includes(searchQuery.toLowerCase()) || (n.content || '').toLowerCase().includes(searchQuery.toLowerCase());
         return matchesTag && matchesSearch;
       }).sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0) || new Date(b.updatedAt) - new Date(a.updatedAt));
 
@@ -468,7 +569,7 @@
             </div>
           </div>
           <p class="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 mt-1">
-            ${note.locked ? '🔒 Защищено паролем' : (note.content.replace(/[#*`|]/g, '') || 'Пустая заметка...')}
+            ${note.locked ? '🔒 Защищено паролем' : ((note.content || '').replace(/[#*`|]/g, '') || 'Пустая заметка...')}
           </p>
         </div>
       `}).join('');
@@ -502,8 +603,8 @@
       const note = notes.find(n => n.id === currentId);
       if (!note) return;
 
-      document.getElementById('noteTitle').value = note.title;
-      document.getElementById('noteContent').value = note.content;
+      document.getElementById('noteTitle').value = note.title || '';
+      document.getElementById('noteContent').value = note.content || '';
       document.getElementById('noteTags').value = (note.tags || []).join(', ');
 
       renderAttachments(note);
@@ -532,20 +633,15 @@
       const raw = document.getElementById('noteContent').value || '*Пусто...*';
       const previewArea = document.getElementById('previewArea');
 
-      // Заменяем блоки ```mermaid на div class="mermaid"
       const processed = raw.replace(/```mermaid([\s\S]*?)```/g, '<div class="mermaid">$1</div>');
       previewArea.innerHTML = marked.parse(processed);
 
-      // Отрисовка всех графиков Mermaid
       try {
         await mermaid.run({ querySelector: '.mermaid' });
-      } catch (e) {
-        console.warn('Ошибка синтаксиса диаграммы:', e);
-      }
+      } catch (e) {}
     }
 
     // --- РЕЖИМЫ ОТОБРАЖЕНИЯ (ТЕКСТ / 2 ОКНА / ПРЕВЬЮ) ---
-    const workspaceGrid = document.getElementById('workspaceGrid');
     const noteContent = document.getElementById('noteContent');
     const previewArea = document.getElementById('previewArea');
     const tabEdit = document.getElementById('tabEdit');
@@ -560,18 +656,15 @@
 
       if (mode === 'edit') {
         tabEdit.classList.add('bg-white', 'dark:bg-slate-700', 'shadow-sm');
-        workspaceGrid.className = 'flex-1 grid grid-cols-1 overflow-hidden px-6 py-4 gap-6';
         noteContent.classList.remove('hidden');
         previewArea.classList.add('hidden');
       } else if (mode === 'split') {
         tabSplit.classList.add('bg-white', 'dark:bg-slate-700', 'shadow-sm');
-        workspaceGrid.className = 'flex-1 grid grid-cols-2 overflow-hidden px-6 py-4 gap-6';
         noteContent.classList.remove('hidden');
         previewArea.classList.remove('hidden');
         updatePreview();
       } else if (mode === 'preview') {
         tabPreview.classList.add('bg-white', 'dark:bg-slate-700', 'shadow-sm');
-        workspaceGrid.className = 'flex-1 grid grid-cols-1 overflow-hidden px-6 py-4 gap-6';
         noteContent.classList.add('hidden');
         previewArea.classList.remove('hidden');
         updatePreview();
@@ -632,7 +725,6 @@
       reader.onload = (ev) => {
         const img = new Image();
         img.onload = () => {
-          // Сжимаем изображение до 800px для быстрой синхронизации
           const canvas = document.createElement('canvas');
           const maxW = 800;
           const scale = img.width > maxW ? maxW / img.width : 1;
@@ -735,7 +827,7 @@
       closeSketchModal();
     }
 
-    // --- 5. ПОМОДОРО ТАЙМЕР И ГОЛОСОВОЙ ВВОД ---
+    // --- 5. ПОМОДОРО И ГОЛОСОВОЙ ВВОД ---
     let pomoInterval = null, pomoSeconds = 25 * 60;
     document.getElementById('pomoToggle').addEventListener('click', (e) => {
       if (pomoInterval) {
@@ -751,14 +843,13 @@
           document.getElementById('pomoTime').textContent = `${m}:${s}`;
           if (pomoSeconds <= 0) {
             clearInterval(pomoInterval);
-            alert('🎉 Сессия фокуса завершена! Сделайте 5 минут перерыва.');
+            alert('🎉 Сессия фокуса завершена!');
             pomoSeconds = 25 * 60;
           }
         }, 1000);
       }
     });
 
-    // Голосовая диктовка
     document.getElementById('voiceBtn').addEventListener('click', () => {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       if (!SpeechRecognition) return alert('Ваш браузер не поддерживает голосовой ввод (используйте Chrome).');
@@ -775,16 +866,17 @@
     function aiSummarize() {
       const note = notes.find(n => n.id === currentId);
       if (!note) return;
-      note.content += `\n\n### ✨ План действий (Aura AI):\n- [ ] Проверить ключевые метрики в таблице\n- [ ] Обновить диаграмму прогресса\n- [ ] Подготовить презентацию`;
+      note.content += `\n\n### ✨ План действий (Aura AI):\n- [ ] Проверить ключевые метрики в таблице\n- [ ] Обновить диаграмму прогресса\n- [ ] Выгрузить итоговый отчет в Word (.doc)`;
       document.getElementById('noteContent').value = note.content;
       handleInput();
     }
 
     // --- БАЗОВЫЕ КНОПКИ ---
     function calcStats() {
-      const text = document.getElementById('noteContent').value;
+      const text = document.getElementById('noteContent').value || '';
       const words = text.trim() ? text.trim().split(/\s+/).length : 0;
       document.getElementById('statsWords').textContent = `${words} слов`;
+      document.getElementById('statsChars').textContent = `${text.length} симв.`;
     }
 
     document.getElementById('createNoteBtn').addEventListener('click', () => {
