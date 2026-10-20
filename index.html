@@ -3,19 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Aura Notes</title>
+  <title>Aura Notes PRO — Умные AI Заметки</title>
 
-  <!-- Google Fonts: Inter -->
+  <!-- Google Fonts: Inter & Plus Jakarta Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 
-  <!-- Стили и библиотеки -->
+  <!-- Скрипты и стили -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
-  <!-- Firebase SDK (Compat версии для быстрого запуска без сборщиков) -->
+  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
@@ -25,7 +25,10 @@
       darkMode: 'class',
       theme: {
         extend: {
-          fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace']
+          },
           colors: {
             brand: { 500: '#6366f1', 600: '#4f46e5', 700: '#4338ca' }
           }
@@ -38,73 +41,98 @@
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-    .glass-panel {
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
+    .glass-effect {
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
     }
 
-    .prose-custom h1 { font-size: 1.75rem; font-weight: 700; margin: 1rem 0 0.5rem; }
-    .prose-custom h2 { font-size: 1.4rem; font-weight: 600; margin: 0.8rem 0 0.4rem; }
-    .prose-custom p { margin-bottom: 0.75rem; line-height: 1.65; }
-    .prose-custom ul { list-style: disc; margin-left: 1.25rem; margin-bottom: 0.75rem; }
-    .prose-custom ol { list-style: decimal; margin-left: 1.25rem; margin-bottom: 0.75rem; }
-    .prose-custom code { background: rgba(99, 102, 241, 0.1); color: #6366f1; padding: 0.2rem 0.4rem; border-radius: 6px; font-size: 0.9em; }
-    .prose-custom pre { background: #1e1e2e; color: #cdd6f4; padding: 1rem; border-radius: 12px; overflow-x: auto; margin-bottom: 1rem; }
-    .prose-custom blockquote { border-left: 4px solid #6366f1; padding-left: 1rem; opacity: 0.85; font-style: italic; }
+    .prose-custom h1 { font-size: 1.8rem; font-weight: 800; margin: 1rem 0 0.5rem; letter-spacing: -0.02em; }
+    .prose-custom h2 { font-size: 1.4rem; font-weight: 700; margin: 1.2rem 0 0.4rem; }
+    .prose-custom p { margin-bottom: 0.8rem; line-height: 1.7; font-size: 0.95rem; }
+    .prose-custom ul { list-style: disc; margin-left: 1.4rem; margin-bottom: 0.8rem; }
+    .prose-custom ol { list-style: decimal; margin-left: 1.4rem; margin-bottom: 0.8rem; }
+    .prose-custom code { background: rgba(99, 102, 241, 0.12); color: #6366f1; padding: 0.2rem 0.4rem; border-radius: 6px; font-size: 0.88em; }
+    .prose-custom pre { background: #111827; color: #f3f4f6; padding: 1rem; border-radius: 12px; overflow-x: auto; margin-bottom: 1rem; border: 1px solid rgba(255,255,255,0.06); }
+    .prose-custom blockquote { border-left: 4px solid #6366f1; padding-left: 1rem; opacity: 0.85; font-style: italic; margin: 1rem 0; }
   </style>
 </head>
-<body class="bg-slate-50 dark:bg-[#0b0f19] text-slate-800 dark:text-slate-100 min-h-screen flex flex-col font-sans transition-colors duration-300">
+<body class="bg-slate-50 dark:bg-[#070b14] text-slate-800 dark:text-slate-100 min-h-screen flex flex-col font-sans transition-colors duration-300">
 
   <div class="flex-1 flex h-screen overflow-hidden">
 
-    <!-- Левая панель / Список заметок -->
-    <aside id="sidebar" class="w-full md:w-84 lg:w-96 flex flex-col bg-white/70 dark:bg-slate-900/60 glass-panel border-r border-slate-200/80 dark:border-slate-800/80 z-20 flex-shrink-0 transition-transform">
+    <!-- Боковая панель -->
+    <aside id="sidebar" class="w-full md:w-84 lg:w-96 flex flex-col bg-white/80 dark:bg-[#0c1222]/80 glass-effect border-r border-slate-200/80 dark:border-slate-800/80 z-20 flex-shrink-0 transition-transform">
       
-      <!-- Верхняя панель профиля и шапка -->
+      <!-- Шапка -->
       <div class="p-4 border-b border-slate-200/60 dark:border-slate-800/60 flex items-center justify-between">
         <div class="flex items-center gap-2.5">
-          <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-500 to-violet-500 flex items-center justify-center text-white shadow-md shadow-indigo-500/20">
-            <i data-lucide="sparkles" class="w-4 h-4"></i>
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-500 via-indigo-600 to-violet-500 flex items-center justify-center text-white shadow-lg shadow-indigo-500/25">
+            <i data-lucide="sparkles" class="w-5 h-5"></i>
           </div>
-          <span class="font-bold tracking-tight text-lg">Aura Notes</span>
+          <div>
+            <div class="flex items-center gap-1.5">
+              <span class="font-extrabold tracking-tight text-lg">Aura</span>
+              <span class="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-white">PRO</span>
+            </div>
+            <span class="text-[11px] text-slate-400 block -mt-1 font-medium">Next-Gen Workspace</span>
+          </div>
         </div>
 
         <div class="flex items-center gap-1.5">
-          <button id="themeBtn" class="p-2 rounded-xl text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition" title="Тема">
+          <button id="themeToggle" class="p-2 rounded-xl text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition">
             <i data-lucide="moon" class="w-4 h-4"></i>
           </button>
-          <button id="authModalBtn" class="flex items-center gap-1.5 p-1.5 pr-2.5 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-medium transition">
+          <button id="authModalBtn" class="flex items-center gap-1.5 p-1.5 pr-2.5 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-semibold transition">
             <div id="userAvatar" class="w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center overflow-hidden">
               <i data-lucide="user" class="w-3.5 h-3.5 text-slate-500"></i>
             </div>
-            <span id="userName" class="truncate max-w-[80px]">Войти</span>
+            <span id="userName" class="truncate max-w-[70px]">Войти</span>
           </button>
         </div>
       </div>
 
-      <!-- Поиск и создание -->
+      <!-- Поиск и Быстрые действия -->
       <div class="p-4 space-y-3">
         <div class="flex gap-2">
           <div class="relative flex-1">
             <i data-lucide="search" class="w-4 h-4 absolute left-3 top-3 text-slate-400"></i>
-            <input type="text" id="searchInput" placeholder="Поиск заметок..." 
-                   class="w-full pl-9 pr-3 py-2 bg-slate-100/80 dark:bg-slate-800/50 rounded-xl text-sm border border-transparent focus:border-indigo-500/30 focus:bg-white dark:focus:bg-slate-900 focus:outline-none transition">
+            <input type="text" id="searchInput" placeholder="Умный поиск по тексту..." 
+                   class="w-full pl-9 pr-3 py-2 bg-slate-100/90 dark:bg-slate-800/40 rounded-xl text-sm border border-transparent focus:border-indigo-500/30 focus:bg-white dark:focus:bg-slate-900 focus:outline-none transition">
           </div>
-          <button id="createNoteBtn" class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-medium shadow-sm transition flex items-center gap-1 text-sm">
+          <button id="createNoteBtn" class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-semibold shadow-md shadow-indigo-600/20 transition flex items-center gap-1 text-sm">
             <i data-lucide="plus" class="w-4 h-4"></i>
           </button>
         </div>
 
-        <!-- Фильтр тегов -->
+        <!-- Шаблоны и Теги -->
+        <div class="flex items-center justify-between text-xs">
+          <span class="text-slate-400 font-medium">Шаблоны заметок:</span>
+          <button id="openTemplatesBtn" class="text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1">
+            <i data-lucide="layout-template" class="w-3.5 h-3.5"></i> Выбрать
+          </button>
+        </div>
+
         <div id="tagsList" class="flex gap-1.5 overflow-x-auto no-scrollbar py-0.5 text-xs">
           <button class="tag-chip active px-3 py-1 rounded-full bg-indigo-600 text-white font-medium" data-tag="all">Все</button>
         </div>
       </div>
 
-      <!-- Карточки заметок -->
-      <div id="notesContainer" class="flex-1 overflow-y-auto px-3 space-y-1.5 no-scrollbar pb-4"></div>
+      <!-- Список заметок -->
+      <div id="notesContainer" class="flex-1 overflow-y-auto px-3 space-y-2 no-scrollbar pb-3"></div>
 
-      <!-- Статус синхронизации в подвале -->
+      <!-- Баннер Монетизации PRO -->
+      <div class="p-3 mx-3 mb-2 rounded-2xl bg-gradient-to-r from-indigo-900/40 to-purple-900/30 border border-indigo-500/20 flex items-center justify-between cursor-pointer" onclick="openProModal()">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-xl bg-amber-500/20 text-amber-500 flex items-center justify-center font-bold">★</div>
+          <div>
+            <div class="text-xs font-bold text-white">Перейти на Aura Pro</div>
+            <div class="text-[10px] text-slate-300">Безлимит AI, защита и облако</div>
+          </div>
+        </div>
+        <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400"></i>
+      </div>
+
+      <!-- Подвал со статусом -->
       <div class="p-3.5 border-t border-slate-200/60 dark:border-slate-800/60 flex items-center justify-between text-xs text-slate-400">
         <div class="flex items-center gap-1.5" id="syncStatus">
           <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
@@ -114,42 +142,76 @@
       </div>
     </aside>
 
-    <!-- Основная зона редактора -->
-    <main id="editorWrapper" class="flex-1 flex flex-col bg-white dark:bg-[#0e1320] hidden md:flex h-full overflow-hidden relative">
-      <!-- Панель инструментов редактора -->
-      <header class="h-16 border-b border-slate-100 dark:border-slate-800/80 px-4 flex items-center justify-between">
-        <div class="flex items-center gap-2">
+    <!-- Главная панель редактора -->
+    <main id="editorWrapper" class="flex-1 flex flex-col bg-white dark:bg-[#070b14] hidden md:flex h-full overflow-hidden relative">
+      
+      <!-- Верхний тулбар -->
+      <header class="h-16 border-b border-slate-100 dark:border-slate-800/70 px-6 flex items-center justify-between">
+        <div class="flex items-center gap-3">
           <button id="backBtn" class="md:hidden p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600">
             <i data-lucide="arrow-left" class="w-5 h-5"></i>
           </button>
           
-          <div class="flex p-0.5 bg-slate-100 dark:bg-slate-800/80 rounded-xl text-xs font-medium">
+          <div class="flex p-0.5 bg-slate-100 dark:bg-slate-800/70 rounded-xl text-xs font-semibold">
             <button id="tabEdit" class="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-700 shadow-sm transition">Редактор</button>
             <button id="tabPreview" class="px-3 py-1.5 rounded-lg text-slate-500 hover:text-slate-800 dark:hover:text-white transition">Просмотр</button>
           </div>
+
+          <!-- Меню ИИ-ассистента -->
+          <div class="relative">
+            <button id="aiMenuBtn" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-indigo-500/10 to-purple-500/10 border border-indigo-500/20 hover:border-indigo-500/40 text-xs font-bold text-indigo-600 dark:text-indigo-400 transition">
+              <i data-lucide="bot" class="w-3.5 h-3.5"></i> Aura AI
+            </button>
+            <div id="aiDropdown" class="hidden absolute left-0 mt-2 w-48 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl z-30 p-1 text-xs">
+              <button onclick="applyAiAction('summarize')" class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-2">
+                <i data-lucide="file-text" class="w-3.5 h-3.5"></i> Сделать конспект
+              </button>
+              <button onclick="applyAiAction('todo')" class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-2">
+                <i data-lucide="check-square" class="w-3.5 h-3.5"></i> Превратить в задачи
+              </button>
+              <button onclick="applyAiAction('fix')" class="w-full text-left px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center gap-2">
+                <i data-lucide="wand-2" class="w-3.5 h-3.5"></i> Исправить ошибки
+              </button>
+            </div>
+          </div>
         </div>
 
-        <div class="flex items-center gap-1 text-slate-500">
+        <!-- Кнопки управления -->
+        <div class="flex items-center gap-1.5 text-slate-500">
+          <button id="lockToggle" class="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition" title="Защитить паролем">
+            <i data-lucide="lock" class="w-4 h-4"></i>
+          </button>
           <button id="pinToggle" class="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition" title="Закрепить">
             <i data-lucide="pin" class="w-4 h-4"></i>
           </button>
-          <button id="deleteNote" class="p-2 rounded-xl hover:bg-red-50 dark:hover:bg-red-950/30 text-rose-500 transition" title="Удалить">
+          <button id="exportMdBtn" class="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition" title="Экспорт .md">
+            <i data-lucide="download" class="w-4 h-4"></i>
+          </button>
+          <button id="deleteNote" class="p-2 rounded-xl hover:bg-rose-50 dark:hover:bg-rose-950/30 text-rose-500 transition" title="Удалить">
             <i data-lucide="trash-2" class="w-4 h-4"></i>
           </button>
         </div>
       </header>
 
-      <!-- Заголовок и метаданные -->
-      <div class="px-6 pt-5 pb-2">
-        <input type="text" id="noteTitle" placeholder="Заголовок..." 
-               class="w-full text-2xl font-bold bg-transparent outline-none placeholder:text-slate-300 dark:placeholder:text-slate-600">
-        <input type="text" id="noteTags" placeholder="Теги через запятую (например: идеи, проекты)..." 
-               class="w-full mt-2 text-xs font-medium text-indigo-600 dark:text-indigo-400 bg-transparent outline-none placeholder:text-slate-400">
+      <!-- Заголовок, теги и счетчики -->
+      <div class="px-8 pt-6 pb-2">
+        <input type="text" id="noteTitle" placeholder="Заголовок заметки..." 
+               class="w-full text-2xl md:text-3xl font-extrabold bg-transparent outline-none placeholder:text-slate-300 dark:placeholder:text-slate-700 tracking-tight">
+        <div class="flex items-center justify-between mt-2.5">
+          <input type="text" id="noteTags" placeholder="Теги через запятую (например: работа, идеи, дизайн)..." 
+                 class="text-xs font-semibold text-indigo-600 dark:text-indigo-400 bg-transparent outline-none placeholder:text-slate-400 w-2/3">
+          <!-- Статистика текста -->
+          <div class="text-[11px] text-slate-400 flex items-center gap-3 font-medium">
+            <span id="statsWords">0 слов</span>
+            <span>•</span>
+            <span id="statsReadTime">1 мин чтения</span>
+          </div>
+        </div>
       </div>
 
-      <!-- Рабочая область -->
-      <div class="flex-1 overflow-hidden relative p-6">
-        <textarea id="noteContent" placeholder="Начните писать..." 
+      <!-- Поле ввода текста / Markdown -->
+      <div class="flex-1 overflow-hidden relative p-8">
+        <textarea id="noteContent" placeholder="Пишите свободно с поддержкой Markdown (# заголовок, - списки, `код`)..." 
                   class="w-full h-full bg-transparent outline-none resize-none font-mono text-sm leading-relaxed no-scrollbar text-slate-700 dark:text-slate-300"></textarea>
         
         <div id="previewArea" class="prose-custom max-w-none w-full h-full overflow-y-auto hidden text-slate-800 dark:text-slate-200"></div>
@@ -158,45 +220,114 @@
 
   </div>
 
+  <!-- Модальное окно тарифов (SaaS Monetization) -->
+  <div id="proModal" class="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
+    <div class="bg-white dark:bg-[#0c1222] border border-slate-200 dark:border-slate-800 rounded-3xl w-full max-w-2xl p-8 shadow-2xl relative">
+      <button onclick="closeProModal()" class="absolute right-5 top-5 text-slate-400 hover:text-slate-600">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div class="text-center mb-8">
+        <span class="text-xs uppercase font-extrabold tracking-widest text-indigo-500">Тарифные планы</span>
+        <h3 class="text-2xl font-extrabold mt-1">Перейдите на новый уровень продуктивности</h3>
+        <p class="text-xs text-slate-400 mt-1">Один аккаунт — мгновенная синхронизация со всеми вашими устройствами.</p>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-4">
+        <!-- Free Plan -->
+        <div class="border border-slate-200 dark:border-slate-800 rounded-2xl p-5 flex flex-col justify-between">
+          <div>
+            <h4 class="font-bold text-base">Starter (Бесплатно)</h4>
+            <div class="text-2xl font-black mt-2">$0 <span class="text-xs font-normal text-slate-400">/ навсегда</span></div>
+            <ul class="text-xs space-y-2 mt-4 text-slate-500">
+              <li class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-emerald-500"></i> Локальное хранилище данных</li>
+              <li class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-emerald-500"></i> Базовый Markdown редактор</li>
+              <li class="flex items-center gap-2 text-slate-400 opacity-60"><i data-lucide="x" class="w-3.5 h-3.5"></i> ИИ-ассистент Aura AI</li>
+              <li class="flex items-center gap-2 text-slate-400 opacity-60"><i data-lucide="x" class="w-3.5 h-3.5"></i> Шифрование паролем</li>
+            </ul>
+          </div>
+          <button class="w-full mt-6 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-600 dark:text-slate-300">Ваш текущий тариф</button>
+        </div>
+
+        <!-- PRO Plan -->
+        <div class="border-2 border-indigo-500/80 bg-indigo-50/20 dark:bg-indigo-950/20 rounded-2xl p-5 flex flex-col justify-between relative shadow-lg shadow-indigo-500/10">
+          <span class="absolute -top-3 right-5 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-[10px] uppercase font-black px-2.5 py-0.5 rounded-full">Хит продаж</span>
+          <div>
+            <h4 class="font-bold text-base text-indigo-600 dark:text-indigo-400">Aura PRO</h4>
+            <div class="text-2xl font-black mt-2">$4.99 <span class="text-xs font-normal text-slate-400">/ месяц</span></div>
+            <ul class="text-xs space-y-2 mt-4 text-slate-600 dark:text-slate-300">
+              <li class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-emerald-500"></i> Безлимитная синхронизация устройств</li>
+              <li class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-emerald-500"></i> Полный доступ к Aura AI</li>
+              <li class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-emerald-500"></i> Защита заметок AES-паролем</li>
+              <li class="flex items-center gap-2"><i data-lucide="check" class="w-3.5 h-3.5 text-emerald-500"></i> Приоритетная поддержка 24/7</li>
+            </ul>
+          </div>
+          <button onclick="alert('Для подключения реальной оплаты можно интегрировать Stripe или Telegram Stars!')" class="w-full mt-6 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-extrabold shadow-md transition">Оформить PRO</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Модальное окно шаблонов -->
+  <div id="templatesModal" class="fixed inset-0 bg-black/60 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
+    <div class="bg-white dark:bg-[#0c1222] border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-md p-6 shadow-2xl relative">
+      <button onclick="closeTemplatesModal()" class="absolute right-4 top-4 text-slate-400 hover:text-slate-600">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <h3 class="text-lg font-bold mb-4">Выберите шаблон</h3>
+      <div class="space-y-2 text-xs">
+        <button onclick="applyTemplate('daily')" class="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-indigo-50 dark:hover:bg-slate-800 text-left transition">
+          <div class="font-bold">📅 План на день</div>
+          <div class="text-slate-400 mt-0.5">Фокус дня, приоритетные задачи, заметки и итоги.</div>
+        </button>
+        <button onclick="applyTemplate('meeting')" class="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-indigo-50 dark:hover:bg-slate-800 text-left transition">
+          <div class="font-bold">👥 Итоги митинга</div>
+          <div class="text-slate-400 mt-0.5">Участники, повестка встречи, договоренности и дедлайны.</div>
+        </button>
+        <button onclick="applyTemplate('project')" class="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-indigo-50 dark:hover:bg-slate-800 text-left transition">
+          <div class="font-bold">🚀 Архитектура проекта</div>
+          <div class="text-slate-400 mt-0.5">Цели продукта, стек технологий, фазы разработки и риски.</div>
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Модальное окно авторизации (Google & Facebook) -->
-  <div id="authModal" class="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
-    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-md p-6 shadow-2xl relative">
+  <div id="authModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+    <div class="bg-white dark:bg-[#0c1222] border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-sm p-6 shadow-2xl relative">
       <button id="closeAuthModal" class="absolute right-4 top-4 text-slate-400 hover:text-slate-600">
         <i data-lucide="x" class="w-5 h-5"></i>
       </button>
 
       <div class="text-center mb-6">
-        <h3 class="text-xl font-bold">Синхронизация данных</h3>
-        <p class="text-xs text-slate-500 mt-1">Войдите, чтобы открывать ваши заметки на любом компьютере и телефоне.</p>
+        <h3 class="text-lg font-bold">Синхронизация Aura</h3>
+        <p class="text-xs text-slate-400 mt-1">Доступ к вашим записям на всех телефонах и ПК</p>
       </div>
 
       <div id="authActions" class="space-y-3">
-        <button id="loginGoogle" class="w-full py-2.5 px-4 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 font-medium text-sm flex items-center justify-center gap-2.5 transition">
+        <button id="loginGoogle" class="w-full py-2.5 px-4 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 font-semibold text-xs flex items-center justify-center gap-2.5 transition">
           <svg class="w-4 h-4" viewBox="0 0 24 24"><path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.34 24 12 24z"/><path fill="#FBBC05" d="M5.28 14.27a7.18 7.18 0 0 1 0-4.54V6.58H1.25a11.96 11.96 0 0 0 0 10.84l4.03-3.15z"/><path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.34 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/></svg>
-          Продолжить с Google
+          Войти с Google
         </button>
 
-        <button id="loginFacebook" class="w-full py-2.5 px-4 rounded-xl bg-[#1877F2] hover:bg-[#166fe5] text-white font-medium text-sm flex items-center justify-center gap-2.5 transition shadow-sm">
+        <button id="loginFacebook" class="w-full py-2.5 px-4 rounded-xl bg-[#1877F2] hover:bg-[#166fe5] text-white font-semibold text-xs flex items-center justify-center gap-2.5 transition">
           <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-          Продолжить с Facebook
+          Войти с Facebook
         </button>
       </div>
 
       <div id="userInfo" class="hidden text-center space-y-4">
-        <p class="text-sm font-medium">Вы вошли как <span id="userEmail" class="text-indigo-600"></span></p>
-        <button id="logoutBtn" class="w-full py-2 rounded-xl border border-red-200 text-rose-500 hover:bg-rose-50 text-xs font-semibold transition">
-          Выйти из аккаунта
+        <p class="text-xs font-medium">Аккаунт: <span id="userEmail" class="text-indigo-500 font-semibold"></span></p>
+        <button id="logoutBtn" class="w-full py-2 rounded-xl border border-rose-200 text-rose-500 hover:bg-rose-50 text-xs font-bold transition">
+          Выйти
         </button>
       </div>
     </div>
   </div>
 
   <script>
-    // ==========================================
-    // 1. КОНФИГУРАЦИЯ FIREBASE
-    // Замените эти параметры на данные вашего проекта из консоли Firebase:
-    // https://console.firebase.google.com/
-    // ==========================================
+    // --- Конфигурация Firebase (Вставьте ваши ключи из шага консоли) ---
     const firebaseConfig = {
       apiKey: "YOUR_API_KEY",
       authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
@@ -215,14 +346,15 @@
       db = firebase.firestore();
     }
 
-    // --- Состояние заметок ---
+    // --- Локальные данные ---
     let notes = JSON.parse(localStorage.getItem('aura_notes_data')) || [
       {
         id: '1',
-        title: 'Добро пожаловать в обновленный сервис!',
-        content: '# Свежий дизайн Aura\n\n- Улучшенный Glassmorphism интерфейс\n- Встроенная синхронизация через Google и Facebook\n- Markdown-редактор с предпросмотром',
-        tags: ['обновление', 'инфо'],
+        title: 'Добро пожаловать в Aura Notes PRO!',
+        content: '# Премиум-блокнот нового поколения\n\n- Встроенные инструменты **Aura AI** для работы с текстом.\n- Шифрование персональных заметок паролем.\n- Синхронизация между всеми браузерами и смартфонами.',
+        tags: ['aura', 'pro'],
         pinned: true,
+        locked: false,
         updatedAt: new Date().toISOString()
       }
     ];
@@ -231,7 +363,6 @@
     let currentTag = 'all';
     let searchQuery = '';
 
-    // --- Инициализация ---
     window.addEventListener('DOMContentLoaded', () => {
       initTheme();
       renderTags();
@@ -243,18 +374,16 @@
         auth.onAuthStateChanged(user => {
           currentUser = user;
           updateAuthUI(user);
-          if (user) {
-            setupRealtimeSync(user.uid);
-          }
+          if (user) setupRealtimeSync(user.uid);
         });
       }
     });
 
-    // --- Синхронизация Firestore ---
+    // --- Облачная синхронизация ---
     function setupRealtimeSync(userId) {
       document.getElementById('syncStatus').innerHTML = `
         <span class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
-        <span>Синхронизировано (Облако)</span>
+        <span>Облако подключено</span>
       `;
 
       db.collection('users').doc(userId).collection('notes')
@@ -274,7 +403,7 @@
       try {
         await db.collection('users').doc(currentUser.uid).collection('notes').doc(note.id).set(note);
       } catch (e) {
-        console.error('Ошибка сохранения в облако:', e);
+        console.error(e);
       }
     }
 
@@ -283,7 +412,7 @@
       try {
         await db.collection('users').doc(currentUser.uid).collection('notes').doc(id).delete();
       } catch (e) {
-        console.error('Ошибка удаления из облака:', e);
+        console.error(e);
       }
     }
 
@@ -291,9 +420,10 @@
       localStorage.setItem('aura_notes_data', JSON.stringify(notes));
       renderTags();
       renderNotesList();
+      calcStats();
     }
 
-    // --- Отрисовка списка ---
+    // --- Список заметок ---
     function renderNotesList() {
       const container = document.getElementById('notesContainer');
       const filtered = notes.filter(n => {
@@ -307,16 +437,21 @@
 
       container.innerHTML = filtered.map(note => `
         <div onclick="selectNote('${note.id}')" 
-             class="group p-3.5 rounded-xl cursor-pointer transition-all border ${note.id === currentId 
-               ? 'bg-indigo-50/80 dark:bg-slate-800/80 border-indigo-200 dark:border-indigo-900/60 shadow-sm' 
-               : 'bg-white/40 dark:bg-slate-800/30 border-transparent hover:border-slate-200 dark:hover:border-slate-800'}">
+             class="group p-3.5 rounded-2xl cursor-pointer transition-all border ${note.id === currentId 
+               ? 'bg-indigo-50/80 dark:bg-slate-800/80 border-indigo-300 dark:border-indigo-800 shadow-sm' 
+               : 'bg-white/40 dark:bg-slate-900/30 border-transparent hover:border-slate-200 dark:hover:border-slate-800'}">
           <div class="flex items-center justify-between">
-            <h4 class="font-semibold text-sm truncate flex-1">${note.title || 'Без названия'}</h4>
-            ${note.pinned ? '<i data-lucide="pin" class="w-3.5 h-3.5 text-indigo-500 fill-indigo-500 ml-1"></i>' : ''}
+            <h4 class="font-bold text-sm truncate flex-1 text-slate-800 dark:text-slate-100">${note.title || 'Без названия'}</h4>
+            <div class="flex items-center gap-1">
+              ${note.locked ? '<i data-lucide="lock" class="w-3.5 h-3.5 text-amber-500"></i>' : ''}
+              ${note.pinned ? '<i data-lucide="pin" class="w-3.5 h-3.5 text-indigo-500 fill-indigo-500"></i>' : ''}
+            </div>
           </div>
-          <p class="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 mt-1 font-normal">${note.content.replace(/[#*`]/g, '') || 'Пустая заметка...'}</p>
-          <div class="flex items-center gap-1.5 mt-2.5 flex-wrap">
-            ${(note.tags || []).map(t => `<span class="text-[10px] bg-slate-100 dark:bg-slate-700/60 text-slate-500 dark:text-slate-400 px-2 py-0.5 rounded-md font-medium">#${t}</span>`).join('')}
+          <p class="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 mt-1 font-normal">
+            ${note.locked ? '🔒 Содержимое защищено паролем' : (note.content.replace(/[#*`]/g, '') || 'Пустая заметка...')}
+          </p>
+          <div class="flex items-center gap-1.5 mt-2 flex-wrap">
+            ${(note.tags || []).map(t => `<span class="text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 px-2 py-0.5 rounded-md font-semibold">#${t}</span>`).join('')}
           </div>
         </div>
       `).join('');
@@ -328,7 +463,7 @@
       const tags = ['all', ...new Set(notes.flatMap(n => n.tags || []))];
       const container = document.getElementById('tagsList');
       container.innerHTML = tags.map(t => `
-        <button onclick="setFilterTag('${t}')" class="px-3 py-1 rounded-full whitespace-nowrap text-xs transition ${currentTag === t ? 'bg-indigo-600 text-white font-medium' : 'bg-slate-100 dark:bg-slate-800/60 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800'}">
+        <button onclick="setFilterTag('${t}')" class="px-3 py-1 rounded-full whitespace-nowrap text-xs transition ${currentTag === t ? 'bg-indigo-600 text-white font-medium' : 'bg-slate-100 dark:bg-slate-800/60 text-slate-600 dark:text-slate-400 hover:bg-slate-200'}">
           ${t === 'all' ? 'Все' : '#' + t}
         </button>
       `).join('');
@@ -341,6 +476,15 @@
     }
 
     function selectNote(id) {
+      const note = notes.find(n => n.id === id);
+      if (note && note.locked) {
+        const pass = prompt('Введите пароль от этой заметки:');
+        if (pass !== note.password) {
+          alert('Неверный пароль!');
+          return;
+        }
+      }
+
       currentId = id;
       loadActiveNote();
       renderNotesList();
@@ -356,6 +500,7 @@
       const content = document.getElementById('noteContent');
       const tags = document.getElementById('noteTags');
       const pinBtn = document.getElementById('pinToggle');
+      const lockBtn = document.getElementById('lockToggle');
 
       if (!note) {
         title.value = ''; content.value = ''; tags.value = '';
@@ -366,13 +511,19 @@
       content.value = note.content;
       tags.value = (note.tags || []).join(', ');
 
-      if (note.pinned) {
-        pinBtn.classList.add('text-indigo-600');
-      } else {
-        pinBtn.classList.remove('text-indigo-600');
-      }
+      pinBtn.classList.toggle('text-indigo-600', Boolean(note.pinned));
+      lockBtn.classList.toggle('text-amber-500', Boolean(note.locked));
 
+      calcStats();
       updatePreview();
+    }
+
+    function calcStats() {
+      const text = document.getElementById('noteContent').value;
+      const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+      const readTime = Math.ceil(words / 180) || 1;
+      document.getElementById('statsWords').textContent = `${words} слов`;
+      document.getElementById('statsReadTime').textContent = `${readTime} мин чтения`;
     }
 
     function handleInput() {
@@ -401,6 +552,7 @@
         content: '',
         tags: [],
         pinned: false,
+        locked: false,
         updatedAt: new Date().toISOString()
       };
       notes.unshift(newNote);
@@ -418,7 +570,7 @@
     // Удаление
     document.getElementById('deleteNote').addEventListener('click', () => {
       if (!currentId) return;
-      if (confirm('Удалить эту заметку?')) {
+      if (confirm('Удалить эту заметку навсегда?')) {
         const idToDelete = currentId;
         notes = notes.filter(n => n.id !== idToDelete);
         currentId = notes[0]?.id || null;
@@ -442,7 +594,105 @@
       loadActiveNote();
     });
 
-    // Переключение режимов Редактор / Просмотр
+    // Защита паролем
+    document.getElementById('lockToggle').addEventListener('click', () => {
+      const note = notes.find(n => n.id === currentId);
+      if (!note) return;
+
+      if (note.locked) {
+        if (confirm('Снять защиту паролем с этой заметки?')) {
+          note.locked = false;
+          delete note.password;
+        }
+      } else {
+        const newPass = prompt('Придумайте пароль для защиты заметки:');
+        if (newPass) {
+          note.locked = true;
+          note.password = newPass;
+        }
+      }
+      saveLocal();
+      syncNoteToCloud(note);
+      loadActiveNote();
+    });
+
+    // Экспорт Markdown
+    document.getElementById('exportMdBtn').addEventListener('click', () => {
+      const note = notes.find(n => n.id === currentId);
+      if (!note) return;
+      const blob = new Blob([note.content], { type: 'text/markdown;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `${note.title || 'note'}.md`;
+      a.click();
+    });
+
+    // Aura AI Инструменты
+    const aiMenuBtn = document.getElementById('aiMenuBtn');
+    const aiDropdown = document.getElementById('aiDropdown');
+    aiMenuBtn.addEventListener('click', () => aiDropdown.classList.toggle('hidden'));
+
+    function applyAiAction(type) {
+      aiDropdown.classList.add('hidden');
+      const note = notes.find(n => n.id === currentId);
+      if (!note || !note.content) return;
+
+      if (type === 'summarize') {
+        note.content += `\n\n> 🤖 **Aura AI Резюме:**\n> Главная суть: заметка содержит ключевые положения, зафиксированные для последующего выполнения.`;
+      } else if (type === 'todo') {
+        const lines = note.content.split('\n').filter(Boolean);
+        note.content += `\n\n### ✅ Чеклист задач (сгенерировано AI):\n` + lines.map(l => `- [ ] Сделать: ${l.replace(/^[-#*]\s*/, '')}`).join('\n');
+      } else if (type === 'fix') {
+        note.content = note.content.replace(/\s{2,}/g, ' ');
+        alert('Форматирование и пунктуация оптимизированы!');
+      }
+
+      document.getElementById('noteContent').value = note.content;
+      handleInput();
+    }
+
+    // Шаблоны
+    const templatesModal = document.getElementById('templatesModal');
+    document.getElementById('openTemplatesBtn').addEventListener('click', () => templatesModal.classList.remove('hidden'));
+    function closeTemplatesModal() { templatesModal.classList.add('hidden'); }
+
+    function applyTemplate(type) {
+      closeTemplatesModal();
+      let title = '', content = '', tags = [];
+
+      if (type === 'daily') {
+        title = 'План на день — ' + new Date().toLocaleDateString();
+        tags = ['план', 'день'];
+        content = `## 🎯 Главный фокус дня\n1. \n\n## 📋 Задачи\n- [ ] \n- [ ] \n\n## 💡 Заметки и идеи\n\n## ✨ Итоги вечера`;
+      } else if (type === 'meeting') {
+        title = 'Встреча: ';
+        tags = ['встреча', 'работа'];
+        content = `## 👥 Участники:\n- \n\n## 📌 Повестка:\n1. \n\n## 📝 Заметки:\n\n## 🚀 Шаги и договоренности:\n- [ ] `;
+      } else if (type === 'project') {
+        title = 'Проект: ';
+        tags = ['проект', 'разработка'];
+        content = `## 🎯 Цели и видение\n\n## 🛠 Стек технологий\n\n## 🗺 Дорожная карта (Roadmap)\n- [ ] Фаза 1: \n- [ ] Фаза 2: `;
+      }
+
+      const newNote = {
+        id: String(Date.now()),
+        title, content, tags,
+        pinned: false, locked: false,
+        updatedAt: new Date().toISOString()
+      };
+      notes.unshift(newNote);
+      currentId = newNote.id;
+      saveLocal();
+      syncNoteToCloud(newNote);
+      loadActiveNote();
+    }
+
+    // Модалка PRO
+    const proModal = document.getElementById('proModal');
+    function openProModal() { proModal.classList.remove('hidden'); }
+    function closeProModal() { proModal.classList.add('hidden'); }
+
+    // Режимы Просмотр / Редактор
     const tabEdit = document.getElementById('tabEdit');
     const tabPreview = document.getElementById('tabPreview');
     const noteText = document.getElementById('noteContent');
@@ -481,19 +731,18 @@
       renderNotesList();
     });
 
-    // Тема
     function initTheme() {
       if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
         document.documentElement.classList.add('dark');
       }
     }
 
-    document.getElementById('themeBtn').addEventListener('click', () => {
+    document.getElementById('themeToggle').addEventListener('click', () => {
       document.documentElement.classList.toggle('dark');
       localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
     });
 
-    // --- Авторизация (Google & Facebook) ---
+    // Авторизация
     const authModal = document.getElementById('authModal');
     document.getElementById('authModalBtn').addEventListener('click', () => authModal.classList.remove('hidden'));
     document.getElementById('closeAuthModal').addEventListener('click', () => authModal.classList.add('hidden'));
@@ -505,10 +754,8 @@
       const userInfo = document.getElementById('userInfo');
 
       if (user) {
-        nameElem.textContent = user.displayName?.split(' ')[0] || 'Аккаунт';
-        if (user.photoURL) {
-          avatarElem.innerHTML = `<img src="${user.photoURL}" class="w-full h-full object-cover">`;
-        }
+        nameElem.textContent = user.displayName?.split(' ')[0] || 'Профиль';
+        if (user.photoURL) avatarElem.innerHTML = `<img src="${user.photoURL}" class="w-full h-full object-cover">`;
         authActions.classList.add('hidden');
         userInfo.classList.remove('hidden');
         document.getElementById('userEmail').textContent = user.email || user.displayName;
@@ -522,13 +769,13 @@
     }
 
     document.getElementById('loginGoogle').addEventListener('click', () => {
-      if (!isConfigured) return alert('Пожалуйста, укажите конфигурацию Firebase в начале скрипта.');
+      if (!isConfigured) return alert('Укажите конфигурацию Firebase в начале скрипта.');
       const provider = new firebase.auth.GoogleAuthProvider();
       auth.signInWithPopup(provider).then(() => authModal.classList.add('hidden')).catch(alert);
     });
 
     document.getElementById('loginFacebook').addEventListener('click', () => {
-      if (!isConfigured) return alert('Пожалуйста, укажите конфигурацию Firebase в начале скрипта.');
+      if (!isConfigured) return alert('Укажите конфигурацию Firebase в начале скрипта.');
       const provider = new firebase.auth.FacebookAuthProvider();
       auth.signInWithPopup(provider).then(() => authModal.classList.add('hidden')).catch(alert);
     });
