@@ -3,17 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Aura Notes PRO 3.1 — AI, Word, Диаграммы</title>
+  <title>Aura Notes PRO 5.0 — Полноценный текстовый редактор</title>
 
   <!-- Шрифты -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Playfair+Display:ital,wght@0,500;0,700;1,400&display=swap" rel="stylesheet">
 
-  <!-- Стили и библиотеки -->
+  <!-- Стили и иконки -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 
   <!-- Firebase SDK -->
@@ -28,6 +27,7 @@
         extend: {
           fontFamily: {
             sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            serif: ['"Playfair Display"', 'Georgia', 'serif'],
             mono: ['"JetBrains Mono"', 'monospace']
           }
         }
@@ -39,7 +39,6 @@
     .no-scrollbar::-webkit-scrollbar { display: none; }
     .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-    /* Аккуратный скроллбар для больших экранов */
     .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
     .custom-scroll::-webkit-scrollbar-track { background: transparent; }
     .custom-scroll::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.3); border-radius: 9999px; }
@@ -50,31 +49,74 @@
       -webkit-backdrop-filter: blur(20px);
     }
 
-    /* Оформление Markdown + Таблиц */
-    .prose-custom h1 { font-size: 1.75rem; font-weight: 800; margin: 1rem 0 0.5rem; letter-spacing: -0.02em; }
-    .prose-custom h2 { font-size: 1.35rem; font-weight: 700; margin: 1rem 0 0.4rem; }
-    .prose-custom h3 { font-size: 1.15rem; font-weight: 600; margin: 0.8rem 0 0.3rem; }
-    .prose-custom p { margin-bottom: 0.75rem; line-height: 1.7; font-size: 0.95rem; }
-    .prose-custom ul { list-style: disc; margin-left: 1.4rem; margin-bottom: 0.75rem; }
-    .prose-custom ol { list-style: decimal; margin-left: 1.4rem; margin-bottom: 0.75rem; }
-    .prose-custom code { background: rgba(99, 102, 241, 0.12); color: #6366f1; padding: 0.2rem 0.4rem; border-radius: 6px; font-size: 0.85em; }
-    .prose-custom pre { background: #0f172a; color: #f8fafc; padding: 1rem; border-radius: 12px; overflow-x: auto; margin-bottom: 1rem; }
-    .prose-custom blockquote { border-left: 4px solid #6366f1; padding-left: 1rem; opacity: 0.85; font-style: italic; margin: 1rem 0; }
-    
-    /* Стили таблиц */
-    .prose-custom table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.9rem; border-radius: 8px; overflow: hidden; }
-    .prose-custom th { background: rgba(99, 102, 241, 0.15); font-weight: 700; text-align: left; padding: 0.65rem 0.85rem; border: 1px solid rgba(148, 163, 184, 0.25); }
-    .prose-custom td { padding: 0.6rem 0.85rem; border: 1px solid rgba(148, 163, 184, 0.2); }
-    .prose-custom tr:nth-child(even) { background: rgba(148, 163, 184, 0.05); }
+    /* Стили визуального редактора */
+    #visualEditor {
+      outline: none;
+      line-height: 1.75;
+      font-size: 16px;
+    }
+    #visualEditor:empty:before {
+      content: attr(data-placeholder);
+      color: #64748b;
+      pointer-events: none;
+    }
+    #visualEditor h1 { font-size: 1.85rem; font-weight: 800; margin: 1.2rem 0 0.5rem; }
+    #visualEditor h2 { font-size: 1.4rem; font-weight: 700; margin: 1rem 0 0.4rem; color: #818cf8; }
+    #visualEditor h3 { font-size: 1.15rem; font-weight: 600; margin: 0.8rem 0 0.3rem; }
+    #visualEditor p { margin-bottom: 0.75rem; }
+    #visualEditor ul { list-style: disc; margin-left: 1.5rem; margin-bottom: 0.75rem; }
+    #visualEditor ol { list-style: decimal; margin-left: 1.5rem; margin-bottom: 0.75rem; }
+    #visualEditor blockquote { border-left: 4px solid #6366f1; padding-left: 1rem; color: #94a3b8; font-style: italic; margin: 1rem 0; }
 
-    .mermaid { background: rgba(255,255,255,0.03); padding: 1rem; border-radius: 12px; display: flex; justify-content: center; margin: 1rem 0; overflow-x: auto; }
+    /* Таблицы */
+    #visualEditor table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.2rem 0;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    #visualEditor th {
+      background: rgba(99, 102, 241, 0.18);
+      font-weight: 700;
+      text-align: left;
+      padding: 10px 14px;
+      border: 1px solid rgba(148, 163, 184, 0.3);
+    }
+    #visualEditor td {
+      padding: 10px 14px;
+      border: 1px solid rgba(148, 163, 184, 0.25);
+    }
+
+    .chart-box {
+      background: rgba(99, 102, 241, 0.05);
+      border: 1px solid rgba(99, 102, 241, 0.2);
+      border-radius: 14px;
+      padding: 16px;
+      margin: 16px 0;
+      text-align: center;
+    }
   </style>
 </head>
 <body class="bg-slate-50 dark:bg-[#070b14] text-slate-800 dark:text-slate-100 h-screen overflow-hidden flex flex-col font-sans transition-colors duration-300">
 
+  <!-- ВСПЛЫВАЮЩЕЕ МЕНЮ ПРИ ВЫДЕЛЕНИИ ТЕКСТА МЫШКОЙ -->
+  <div id="floatingToolbar" onmousedown="event.preventDefault()" class="fixed hidden z-50 bg-slate-900 text-white border border-slate-700 rounded-xl shadow-2xl px-2 py-1.5 flex items-center gap-1 transition-opacity">
+    <button onclick="formatDoc('bold')" class="p-1.5 rounded-lg hover:bg-slate-700 font-bold text-xs" title="Жирный">B</button>
+    <button onclick="formatDoc('italic')" class="p-1.5 rounded-lg hover:bg-slate-700 italic text-xs" title="Курсив">I</button>
+    <button onclick="formatDoc('underline')" class="p-1.5 rounded-lg hover:bg-slate-700 underline text-xs" title="Подчеркнутый">U</button>
+    <button onclick="formatDoc('strikeThrough')" class="p-1.5 rounded-lg hover:bg-slate-700 line-through text-xs" title="Зачеркнутый">S</button>
+    <span class="h-4 w-[1px] bg-slate-700 mx-1"></span>
+    <!-- Быстрый маркер выделения -->
+    <button onclick="highlightText('#fef08a', '#1e293b')" class="w-4 h-4 rounded-full bg-yellow-300 border border-white/20" title="Желтый маркер"></button>
+    <button onclick="highlightText('#bbf7d0', '#1e293b')" class="w-4 h-4 rounded-full bg-green-300 border border-white/20" title="Зеленый маркер"></button>
+    <button onclick="highlightText('#fbcfe8', '#1e293b')" class="w-4 h-4 rounded-full bg-pink-300 border border-white/20" title="Розовый маркер"></button>
+    <button onclick="highlightText('transparent', 'inherit')" class="px-1.5 py-0.5 rounded hover:bg-slate-700 text-[10px] text-slate-300" title="Убрать маркер">Сброс</button>
+  </div>
+
   <div class="flex-1 flex h-full w-full overflow-hidden">
 
-    <!-- Боковая панель -->
+    <!-- Левая боковая панель со списком заметок -->
     <aside id="sidebar" class="w-full md:w-80 lg:w-96 flex flex-col h-full bg-white/80 dark:bg-[#0c1222]/80 glass-effect border-r border-slate-200/80 dark:border-slate-800/80 z-20 flex-shrink-0">
       
       <!-- Шапка -->
@@ -85,15 +127,15 @@
           </div>
           <div>
             <div class="flex items-center gap-1.5">
-              <span class="font-extrabold tracking-tight text-lg">Aura</span>
-              <span class="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-white">v3.1</span>
+              <span class="font-extrabold tracking-tight text-lg">Aura Notes</span>
+              <span class="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded-full bg-gradient-to-r from-amber-500 to-orange-500 text-white">5.0</span>
             </div>
-            <span class="text-[11px] text-slate-400 block -mt-1 font-medium">Visual Workspace</span>
+            <span class="text-[11px] text-slate-400 block -mt-1 font-medium">Smart Rich Editor</span>
           </div>
         </div>
 
         <div class="flex items-center gap-1.5">
-          <button id="themeToggle" class="p-2 rounded-xl text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition" title="Тема">
+          <button id="themeToggle" class="p-2 rounded-xl text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800/60 transition" title="Сменить тему">
             <i data-lucide="moon" class="w-4 h-4"></i>
           </button>
           <button id="authModalBtn" class="flex items-center gap-1.5 p-1.5 pr-2.5 rounded-xl border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-semibold transition">
@@ -113,7 +155,7 @@
             <input type="text" id="searchInput" placeholder="Поиск по заметкам..." 
                    class="w-full pl-9 pr-3 py-2 bg-slate-100/90 dark:bg-slate-800/40 rounded-xl text-sm border border-transparent focus:border-indigo-500/30 focus:bg-white dark:focus:bg-slate-900 focus:outline-none transition">
           </div>
-          <button id="createNoteBtn" class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-semibold shadow-md shadow-indigo-600/20 transition flex items-center gap-1 text-sm">
+          <button id="createNoteBtn" class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-semibold shadow-md shadow-indigo-600/20 transition flex items-center gap-1 text-sm" title="Новая заметка">
             <i data-lucide="plus" class="w-4 h-4"></i>
           </button>
         </div>
@@ -124,48 +166,41 @@
         </div>
       </div>
 
-      <!-- Список заметок -->
+      <!-- Список карточек заметок -->
       <div id="notesContainer" class="flex-1 min-h-0 overflow-y-auto px-3 space-y-2 custom-scroll pb-3"></div>
 
       <!-- Подвал -->
       <div class="p-3.5 border-t border-slate-200/60 dark:border-slate-800/60 flex items-center justify-between text-xs text-slate-400 flex-shrink-0">
         <div class="flex items-center gap-1.5" id="syncStatus">
           <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-          <span>Локальный режим</span>
+          <span>Автосохранение активно</span>
         </div>
         <span id="notesCount">0 заметок</span>
       </div>
     </aside>
 
-    <!-- Главная рабочая область (ИСПРАВЛЕНА ВЫСОТА И ПЕРЕПОЛНЕНИЕ НА БОЛЬШИХ ЭКРАНАХ) -->
+    <!-- Правая рабочая область -->
     <main id="editorWrapper" class="flex-1 flex flex-col bg-white dark:bg-[#070b14] hidden md:flex h-full min-w-0 min-h-0 overflow-hidden relative">
       
-      <!-- Верхняя панель -->
-      <header class="h-16 border-b border-slate-100 dark:border-slate-800/70 px-4 lg:px-6 flex items-center justify-between gap-2 overflow-x-auto no-scrollbar flex-shrink-0">
+      <!-- Верхняя шапка с действиями -->
+      <header class="h-14 py-2 border-b border-slate-100 dark:border-slate-800/70 px-4 lg:px-6 flex items-center justify-between gap-2 overflow-x-auto no-scrollbar flex-shrink-0">
         <div class="flex items-center gap-2">
           <button id="backBtn" class="md:hidden p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600">
             <i data-lucide="arrow-left" class="w-5 h-5"></i>
           </button>
-          
-          <!-- Переключатель вида: Текст / 2 Окна / Превью -->
-          <div class="flex p-0.5 bg-slate-100 dark:bg-slate-800/70 rounded-xl text-xs font-semibold">
-            <button id="tabEdit" class="px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-700 shadow-sm transition">Текст</button>
-            <button id="tabSplit" class="hidden lg:block px-2.5 py-1.5 rounded-lg text-slate-500 hover:text-slate-800 dark:hover:text-white transition">2 Окна</button>
-            <button id="tabPreview" class="px-2.5 py-1.5 rounded-lg text-slate-500 hover:text-slate-800 dark:hover:text-white transition">Превью</button>
-          </div>
 
-          <!-- Помодоро Таймер Фокуса -->
-          <div class="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 text-xs font-bold">
+          <!-- Таймер Помодоро -->
+          <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 text-xs font-bold">
             <i data-lucide="timer" class="w-3.5 h-3.5"></i>
             <span id="pomoTime">25:00</span>
             <button id="pomoToggle" class="ml-1 hover:underline text-[11px]">Старт</button>
           </div>
         </div>
 
-        <!-- Правые иконки действий + ЭКСПОРТ В WORD -->
+        <!-- Правые кнопки -->
         <div class="flex items-center gap-1 text-slate-500">
-          <!-- Выбор цвета карточки -->
-          <div class="flex items-center gap-1 mr-2 border-r border-slate-200 dark:border-slate-800 pr-2">
+          <!-- Цвет карточки -->
+          <div class="flex items-center gap-1.5 mr-2 border-r border-slate-200 dark:border-slate-800 pr-3">
             <button onclick="setNoteColor('default')" class="w-3.5 h-3.5 rounded-full bg-slate-300 dark:bg-slate-700" title="Обычный"></button>
             <button onclick="setNoteColor('indigo')" class="w-3.5 h-3.5 rounded-full bg-indigo-500" title="Синий"></button>
             <button onclick="setNoteColor('emerald')" class="w-3.5 h-3.5 rounded-full bg-emerald-500" title="Зеленый"></button>
@@ -173,14 +208,9 @@
             <button onclick="setNoteColor('rose')" class="w-3.5 h-3.5 rounded-full bg-rose-500" title="Красный"></button>
           </div>
 
-          <!-- Кнопка экспорта в Word -->
-          <button onclick="exportToWord()" class="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-blue-600/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 hover:bg-blue-600 hover:text-white transition text-xs font-bold mr-1" title="Скачать файл Microsoft Word (.doc)">
-            <i data-lucide="file-text" class="w-3.5 h-3.5"></i> Word
-          </button>
-
-          <!-- Кнопка экспорта в Markdown -->
-          <button onclick="exportToMd()" class="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition" title="Скачать .md">
-            <i data-lucide="download" class="w-4 h-4"></i>
+          <!-- Экспорт в Word -->
+          <button onclick="exportToWord()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600 text-white hover:bg-blue-700 transition text-xs font-bold mr-1 shadow-sm" title="Скачать в Microsoft Word (.doc)">
+            <i data-lucide="file-down" class="w-3.5 h-3.5"></i> Скачать Word
           </button>
 
           <button id="voiceBtn" class="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition" title="Голосовой ввод">
@@ -198,40 +228,110 @@
         </div>
       </header>
 
-      <!-- Панель вставки: Таблицы, Диаграммы, Картинки, Скетч, AI -->
-      <div class="px-6 py-2 bg-slate-50/70 dark:bg-slate-900/40 border-b border-slate-100 dark:border-slate-800/60 flex items-center gap-2 overflow-x-auto no-scrollbar text-xs font-semibold flex-shrink-0">
-        <button onclick="openTableModal()" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-indigo-500 transition shadow-sm whitespace-nowrap">
+      <!-- ПАНЕЛЬ РЕДАКТИРОВАНИЯ ТЕКСТА (ШРИФТЫ, РАЗМЕР, ЦВЕТ, ВЫДЕЛЕНИЕ МАРКЕРОМ, ВЫРАВНИВАНИЕ) -->
+      <div onmousedown="if(event.target.tagName !== 'SELECT' && event.target.tagName !== 'INPUT') event.preventDefault()" 
+           class="px-6 py-2 bg-slate-50/90 dark:bg-slate-900/70 border-b border-slate-200/70 dark:border-slate-800/80 flex flex-wrap items-center gap-1.5 text-xs font-semibold flex-shrink-0">
+        
+        <!-- Выбор шрифта -->
+        <select onchange="changeFontFamily(this.value)" class="px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 outline-none text-xs cursor-pointer">
+          <option value="Plus Jakarta Sans, sans-serif">Шрифт: Современный</option>
+          <option value="Georgia, serif">Шрифт: Книжный (Serif)</option>
+          <option value="Arial, sans-serif">Шрифт: Классический Arial</option>
+          <option value="JetBrains Mono, monospace">Шрифт: Печатный (Mono)</option>
+          <option value="Comic Sans MS, cursive">Шрифт: Рукописный</option>
+        </select>
+
+        <!-- Выбор размера текста -->
+        <select onchange="formatDoc('fontSize', this.value)" class="px-2 py-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 outline-none text-xs cursor-pointer">
+          <option value="3">Размер: Обычный</option>
+          <option value="2">Мелкий</option>
+          <option value="4">Средний +</option>
+          <option value="5">Крупный</option>
+          <option value="6">Заголовок</option>
+          <option value="7">Огромный</option>
+        </select>
+
+        <span class="h-4 w-[1px] bg-slate-300 dark:bg-slate-700 mx-0.5"></span>
+
+        <!-- Начертание: Жирный, Курсив, Подчеркнутый, Зачеркнутый -->
+        <button onclick="formatDoc('bold')" class="p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800" title="Жирный (Ctrl+B)">
+          <i data-lucide="bold" class="w-4 h-4"></i>
+        </button>
+        <button onclick="formatDoc('italic')" class="p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800" title="Курсив (Ctrl+I)">
+          <i data-lucide="italic" class="w-4 h-4"></i>
+        </button>
+        <button onclick="formatDoc('underline')" class="p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800" title="Подчеркнутый (Ctrl+U)">
+          <i data-lucide="underline" class="w-4 h-4"></i>
+        </button>
+        <button onclick="formatDoc('strikeThrough')" class="p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800" title="Зачеркнутый">
+          <i data-lucide="strikethrough" class="w-4 h-4"></i>
+        </button>
+
+        <span class="h-4 w-[1px] bg-slate-300 dark:bg-slate-700 mx-0.5"></span>
+
+        <!-- Цвет текста -->
+        <label class="flex items-center gap-1 px-2 py-1 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 cursor-pointer hover:border-indigo-500" title="Цвет текста">
+          <i data-lucide="baseline" class="w-3.5 h-3.5 text-indigo-500"></i>
+          <span>Цвет</span>
+          <input type="color" onchange="formatDoc('foreColor', this.value)" value="#6366f1" class="w-4 h-4 border-0 bg-transparent cursor-pointer p-0">
+        </label>
+
+        <!-- Выделение маркером (Фон текста) -->
+        <div class="flex items-center gap-1 px-2 py-1 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700" title="Выделить текст маркером">
+          <i data-lucide="highlighter" class="w-3.5 h-3.5 text-amber-500 mr-0.5"></i>
+          <button onclick="highlightText('#fef08a', '#1e293b')" class="w-3.5 h-3.5 rounded-full bg-yellow-300 border border-slate-400/30" title="Желтый маркер"></button>
+          <button onclick="highlightText('#bbf7d0', '#1e293b')" class="w-3.5 h-3.5 rounded-full bg-green-300 border border-slate-400/30" title="Зеленый маркер"></button>
+          <button onclick="highlightText('#bfdbfe', '#1e293b')" class="w-3.5 h-3.5 rounded-full bg-blue-300 border border-slate-400/30" title="Голубой маркер"></button>
+          <button onclick="highlightText('#fbcfe8', '#1e293b')" class="w-3.5 h-3.5 rounded-full bg-pink-300 border border-slate-400/30" title="Розовый маркер"></button>
+          <button onclick="highlightText('transparent', 'inherit')" class="text-[10px] text-slate-400 hover:text-rose-500 ml-0.5" title="Сбросить выделение">✕</button>
+        </div>
+
+        <span class="h-4 w-[1px] bg-slate-300 dark:bg-slate-700 mx-0.5"></span>
+
+        <!-- Выравнивание и Списки -->
+        <button onclick="formatDoc('justifyLeft')" class="p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800" title="По левому краю">
+          <i data-lucide="align-left" class="w-4 h-4"></i>
+        </button>
+        <button onclick="formatDoc('justifyCenter')" class="p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800" title="По центру">
+          <i data-lucide="align-center" class="w-4 h-4"></i>
+        </button>
+        <button onclick="formatDoc('insertUnorderedList')" class="p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800" title="Маркированный список">
+          <i data-lucide="list" class="w-4 h-4"></i>
+        </button>
+        <button onclick="formatDoc('insertOrderedList')" class="p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800" title="Нумерованный список">
+          <i data-lucide="list-ordered" class="w-4 h-4"></i>
+        </button>
+        <button onclick="formatDoc('removeFormat')" class="p-1.5 rounded-lg hover:bg-rose-100 dark:hover:bg-rose-950/40 text-rose-500" title="Очистить всё форматирование">
+          <i data-lucide="eraser" class="w-4 h-4"></i>
+        </button>
+
+        <span class="h-4 w-[1px] bg-slate-300 dark:bg-slate-700 mx-0.5"></span>
+
+        <!-- Вставка таблиц, диаграмм, картинок -->
+        <button onclick="openTableModal()" class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-indigo-500 transition shadow-sm">
           <i data-lucide="table" class="w-3.5 h-3.5 text-indigo-500"></i> + Таблица
         </button>
 
-        <button onclick="openChartModal()" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-indigo-500 transition shadow-sm whitespace-nowrap">
+        <button onclick="openChartModal()" class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-indigo-500 transition shadow-sm">
           <i data-lucide="pie-chart" class="w-3.5 h-3.5 text-emerald-500"></i> + Диаграмма
         </button>
 
-        <label class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-indigo-500 transition shadow-sm cursor-pointer whitespace-nowrap">
+        <label class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-indigo-500 transition shadow-sm cursor-pointer">
           <i data-lucide="image-plus" class="w-3.5 h-3.5 text-amber-500"></i> + Картинка
           <input type="file" id="imageUploadInput" accept="image/*" class="hidden">
         </label>
 
-        <button onclick="openSketchModal()" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-indigo-500 transition shadow-sm whitespace-nowrap">
-          <i data-lucide="pen-tool" class="w-3.5 h-3.5 text-purple-500"></i> + Скетч от руки
-        </button>
-
-        <button onclick="aiSummarize()" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 hover:bg-indigo-500/20 transition whitespace-nowrap">
-          <i data-lucide="wand-2" class="w-3.5 h-3.5"></i> AI Чек-лист
-        </button>
-
-        <button onclick="exportToWord()" class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 hover:bg-blue-500/20 transition whitespace-nowrap">
-          <i data-lucide="file-down" class="w-3.5 h-3.5"></i> Скачать в Word (.doc)
+        <button onclick="openSketchModal()" class="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-indigo-500 transition shadow-sm">
+          <i data-lucide="pen-tool" class="w-3.5 h-3.5 text-purple-500"></i> + Скетч
         </button>
       </div>
 
-      <!-- Заголовок и метаданные -->
-      <div class="px-6 pt-5 pb-2 flex-shrink-0">
-        <input type="text" id="noteTitle" placeholder="Заголовок заметки..." 
-               class="w-full text-2xl font-extrabold bg-transparent outline-none placeholder:text-slate-300 dark:placeholder:text-slate-700">
+      <!-- Заголовок и теги -->
+      <div class="px-8 pt-5 pb-2 flex-shrink-0">
+        <input type="text" id="noteTitle" placeholder="Название документа..." 
+               class="w-full text-2xl md:text-3xl font-extrabold bg-transparent outline-none placeholder:text-slate-300 dark:placeholder:text-slate-700">
         <div class="flex items-center justify-between mt-2">
-          <input type="text" id="noteTags" placeholder="Теги через запятую..." 
+          <input type="text" id="noteTags" placeholder="Добавить теги через запятую..." 
                  class="text-xs font-semibold text-indigo-600 dark:text-indigo-400 bg-transparent outline-none placeholder:text-slate-400 w-2/3">
           <div class="text-[11px] text-slate-400 flex items-center gap-2 font-medium">
             <span id="statsWords">0 слов</span>
@@ -242,35 +342,34 @@
       </div>
 
       <!-- Галерея прикрепленных картинок и скетчей -->
-      <div id="attachmentsBar" class="px-6 py-2 flex gap-3 overflow-x-auto no-scrollbar hidden border-b border-slate-100 dark:border-slate-800/50 flex-shrink-0"></div>
+      <div id="attachmentsBar" class="px-8 py-2 flex gap-3 overflow-x-auto no-scrollbar hidden border-b border-slate-100 dark:border-slate-800/50 flex-shrink-0"></div>
 
-      <!-- Рабочая зона: ИСПРАВЛЕНА ВЫСОТА И ПРОКРУТКА ТЕКСТА НА БОЛЬШИХ ЭКРАНАХ -->
-      <div id="workspaceGrid" class="flex-1 min-h-0 flex flex-col lg:flex-row overflow-hidden px-6 py-4 gap-6">
-        <textarea id="noteContent" placeholder="Пишите текст, вставляйте таблицы и диаграммы..." 
-                  class="flex-1 w-full h-full min-h-0 bg-transparent outline-none resize-none font-mono text-sm leading-relaxed overflow-y-auto custom-scroll text-slate-700 dark:text-slate-300 pb-20"></textarea>
-        
-        <div id="previewArea" class="flex-1 prose-custom max-w-none w-full h-full min-h-0 overflow-y-auto custom-scroll hidden text-slate-800 dark:text-slate-200 border-t lg:border-t-0 lg:border-l border-slate-200 dark:border-slate-800 pt-4 lg:pt-0 lg:pl-6 pb-20"></div>
+      <!-- ОСНОВНОЕ ПОЛЕ ДОКУМЕНТА -->
+      <div class="flex-1 min-h-0 overflow-y-auto custom-scroll px-8 py-4 pb-28">
+        <div id="visualEditor" contenteditable="true" data-placeholder="Выделите любой текст мышкой, чтобы сделать его жирным, поменять шрифт, цвет или выделить маркером..." 
+             class="max-w-4xl text-slate-700 dark:text-slate-200 min-h-full"></div>
       </div>
+
     </main>
   </div>
 
   <!-- МОДАЛЬНОЕ ОКНО: Генератор таблиц -->
   <div id="tableModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
     <div class="bg-white dark:bg-[#0c1222] border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-sm p-6 shadow-2xl">
-      <h3 class="text-lg font-bold mb-4">Добавить таблицу</h3>
+      <h3 class="text-lg font-bold mb-4">Вставить таблицу</h3>
       <div class="space-y-3 text-xs">
         <div>
           <label class="block text-slate-400 mb-1">Количество столбцов:</label>
-          <input type="number" id="tableCols" value="3" min="1" max="8" class="w-full p-2 rounded-xl bg-slate-100 dark:bg-slate-800 outline-none">
+          <input type="number" id="tableCols" value="3" min="1" max="8" class="w-full p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 outline-none">
         </div>
         <div>
           <label class="block text-slate-400 mb-1">Количество строк:</label>
-          <input type="number" id="tableRows" value="3" min="1" max="20" class="w-full p-2 rounded-xl bg-slate-100 dark:bg-slate-800 outline-none">
+          <input type="number" id="tableRows" value="3" min="1" max="20" class="w-full p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 outline-none">
         </div>
       </div>
       <div class="flex justify-end gap-2 mt-6 text-xs font-bold">
         <button onclick="closeTableModal()" class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800">Отмена</button>
-        <button onclick="insertTable()" class="px-4 py-2 rounded-xl bg-indigo-600 text-white">Вставить</button>
+        <button onclick="insertTable()" class="px-4 py-2 rounded-xl bg-indigo-600 text-white">Добавить таблицу</button>
       </div>
     </div>
   </div>
@@ -279,31 +378,22 @@
   <div id="chartModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
     <div class="bg-white dark:bg-[#0c1222] border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-md p-6 shadow-2xl">
       <div class="flex justify-between items-center mb-4">
-        <h3 class="text-lg font-bold">Вставить диаграмму</h3>
+        <h3 class="text-lg font-bold">Добавить готовую диаграмму</h3>
         <button onclick="closeChartModal()" class="text-slate-400"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
-      <p class="text-xs text-slate-400 mb-4">Выберите тип графика (он автоматически отрисуется в режиме Превью или 2 Окна):</p>
       <div class="space-y-2 text-xs">
-        <button onclick="insertChart('pie')" class="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-indigo-500 text-left flex items-center justify-between">
+        <button onclick="insertChart('pie')" class="w-full p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-indigo-500 text-left flex items-center justify-between">
           <div>
-            <div class="font-bold">📊 Круговая диаграмма (Pie Chart)</div>
-            <div class="text-slate-400">Отлично подходит для бюджета, долей и статистики</div>
+            <div class="font-bold">📊 Круговая диаграмма</div>
+            <div class="text-slate-400 mt-0.5">Готовый цветной график распределения долей</div>
           </div>
           <i data-lucide="chevron-right" class="w-4 h-4"></i>
         </button>
 
-        <button onclick="insertChart('flow')" class="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-indigo-500 text-left flex items-center justify-between">
+        <button onclick="insertChart('flow')" class="w-full p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-indigo-500 text-left flex items-center justify-between">
           <div>
-            <div class="font-bold">🔀 Блок-схема процесса (Flowchart)</div>
-            <div class="text-slate-400">Алгоритмы, воронки продаж и архитектура</div>
-          </div>
-          <i data-lucide="chevron-right" class="w-4 h-4"></i>
-        </button>
-
-        <button onclick="insertChart('mindmap')" class="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-indigo-500 text-left flex items-center justify-between">
-          <div>
-            <div class="font-bold">🧠 Интеллект-карта (Sequence)</div>
-            <div class="text-slate-400">Взаимодействие систем или пошаговый сценарий</div>
+            <div class="font-bold">🔀 Блок-схема этапов</div>
+            <div class="text-slate-400 mt-0.5">Наглядная цепочка шагов проекта от идеи до релиза</div>
           </div>
           <i data-lucide="chevron-right" class="w-4 h-4"></i>
         </button>
@@ -311,19 +401,19 @@
     </div>
   </div>
 
-  <!-- МОДАЛЬНОЕ ОКНО: Скетчпад для рисования -->
+  <!-- МОДАЛЬНОЕ ОКНО: Скетчпад -->
   <div id="sketchModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
     <div class="bg-white dark:bg-[#0c1222] border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-lg p-5 shadow-2xl">
       <div class="flex justify-between items-center mb-3">
-        <h3 class="text-sm font-bold">Нарисовать скетч / рукописную заметку</h3>
+        <h3 class="text-sm font-bold">Нарисовать скетч от руки</h3>
         <button onclick="closeSketchModal()" class="text-slate-400"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
       <canvas id="sketchCanvas" width="460" height="280" class="w-full bg-white rounded-xl border border-slate-200 cursor-crosshair touch-none"></canvas>
       <div class="flex justify-between items-center mt-4 text-xs font-bold">
-        <button onclick="clearSketch()" class="px-3 py-1.5 rounded-lg text-rose-500 hover:bg-rose-50">Очистить</button>
+        <button onclick="clearSketch()" class="px-3 py-1.5 rounded-lg text-rose-500 hover:bg-rose-50">Очистить холст</button>
         <div class="flex gap-2">
           <button onclick="closeSketchModal()" class="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-800">Отмена</button>
-          <button onclick="saveSketch()" class="px-4 py-2 rounded-xl bg-indigo-600 text-white">Прикрепить к заметке</button>
+          <button onclick="saveSketch()" class="px-4 py-2 rounded-xl bg-indigo-600 text-white">Прикрепить</button>
         </div>
       </div>
     </div>
@@ -339,8 +429,8 @@
     <div class="bg-white dark:bg-[#0c1222] border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-sm p-6 shadow-2xl relative">
       <button id="closeAuthModal" class="absolute right-4 top-4 text-slate-400"><i data-lucide="x" class="w-5 h-5"></i></button>
       <div class="text-center mb-6">
-        <h3 class="text-lg font-bold">Облачная синхронизация</h3>
-        <p class="text-xs text-slate-400 mt-1">Ваши таблицы, диаграммы и картинки на всех устройствах</p>
+        <h3 class="text-lg font-bold">Синхронизация аккаунта</h3>
+        <p class="text-xs text-slate-400 mt-1">Доступ к заметкам на компьютере и телефоне</p>
       </div>
       <div id="authActions" class="space-y-3">
         <button id="loginGoogle" class="w-full py-2.5 px-4 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 font-semibold text-xs flex items-center justify-center gap-2">
@@ -379,39 +469,56 @@
       db = firebase.firestore();
     }
 
-    // --- АВТОМАТИЧЕСКОЕ ОБЪЕДИНЕНИЕ ЗАМЕТОК ИЗ ПРОШЛЫХ ВЕРСИЙ ---
-    function loadMergedNotes() {
-      const v3 = JSON.parse(localStorage.getItem('aura_v3_notes') || '[]');
-      const v2 = JSON.parse(localStorage.getItem('aura_notes_data') || '[]');
-      const v1 = JSON.parse(localStorage.getItem('notes_app_data') || '[]');
-      
-      const combined = [...v3, ...v2, ...v1];
-      const uniqueMap = new Map();
-      combined.forEach(item => {
-        if (item && item.id && !uniqueMap.has(item.id)) {
-          uniqueMap.set(item.id, item);
-        }
-      });
+    // --- СТАРТОВАЯ ЗАМЕТКА С ПРИМЕРАМИ ВЫДЕЛЕНИЯ И ШРИФТОВ ---
+    const defaultCleanNote = {
+      id: '1',
+      title: 'Добро пожаловать в Aura Notes 5.0!',
+      content: `
+        <p>Попробуйте <b>выделить любое слово мышкой</b> — прямо над текстом появится быстрое меню, где можно сделать текст <b>жирным</b>, <i>курсивным</i>, <u>подчеркнутым</u> или <span style="background-color: rgb(254, 240, 138); color: rgb(30, 41, 59); padding: 2px 6px; border-radius: 4px;">выделить его ярким маркером</span>!</p>
+        <h2>Новые инструменты оформления текста</h2>
+        <ul>
+          <li><b>Выбор шрифта и размера:</b> меняйте стиль шрифта от современного до книжного или рукописного прямо на верхней панели.</li>
+          <li><b>Цвет текста и Маркер:</b> выделяйте важные мысли <span style="color: #ec4899; font-weight: bold;">любым цветом</span> или цветной заливкой.</li>
+          <li><b>Готовые таблицы и экспорт в Word:</b> создавайте таблицы в один клик и выгружайте документ в формат <b>.doc</b>.</li>
+        </ul>
+        <h2>Пример таблицы задач</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Задача / Этап</th>
+              <th>Приоритет</th>
+              <th>Статус</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Оформление текста и шрифтов</td>
+              <td>Высокий 🔥</td>
+              <td>Готово ✅</td>
+            </tr>
+            <tr>
+              <td>Выделение важных мыслей маркером</td>
+              <td>Средний ⚡</td>
+              <td>Активно ✨</td>
+            </tr>
+          </tbody>
+        </table>
+      `,
+      tags: ['главная', 'редактор'],
+      pinned: true,
+      locked: false,
+      color: 'indigo',
+      attachments: [],
+      updatedAt: new Date().toISOString()
+    };
 
-      const result = Array.from(uniqueMap.values());
-      if (result.length > 0) return result;
-
-      return [
-        {
-          id: '1',
-          title: '🚀 Демо: Таблицы, Диаграммы и Экспорт в Word',
-          content: `Добро пожаловать в **Aura Notes 3.1**!\n\nТеперь весь длинный текст отлично прокручивается на любых мониторах, а сверху появилась кнопка **«Word»** для выгрузки документа в формате \`.doc\`.\n\n### 📊 Пример таблицы расходов\n| Категория | Статус | Бюджет |\n| :--- | :--- | :--- |\n| Разработка | Готово | $1,200 |\n| Маркетинг | В процессе | $800 |\n| Дизайн | Ожидание | $450 |\n\n### 📈 Круговая диаграмма\n\`\`\`mermaid\npie title Распределение времени\n    "Код и архитектура" : 45\n    "Дизайн интерфейса" : 30\n    "Маркетинг и продажи" : 25\n\`\`\`\n\n### 🔀 Блок-схема проекта\n\`\`\`mermaid\ngraph LR\n    A[Идея продукта] --> B(Прототип PWA)\n    B --> C{Тесты}\n    C -->|Успех| D[Запуск продаж]\n    C -->|Правки| B\n\`\`\``,
-          tags: ['демо', 'word'],
-          pinned: true,
-          locked: false,
-          color: 'indigo',
-          attachments: [],
-          updatedAt: new Date().toISOString()
-        }
-      ];
+    function loadNotes() {
+      const saved = JSON.parse(localStorage.getItem('aura_v5_notes') || localStorage.getItem('aura_v4_clean_notes') || 'null');
+      if (saved && Array.isArray(saved) && saved.length > 0) return saved;
+      return [defaultCleanNote];
     }
 
-    let notes = loadMergedNotes();
+    let notes = loadNotes();
     let currentId = notes[0]?.id || null;
     let currentTag = 'all';
     let searchQuery = '';
@@ -423,6 +530,7 @@
       saveLocal();
       loadActiveNote();
       initSketchpad();
+      initFloatingSelectionMenu();
       lucide.createIcons();
 
       if (isConfigured && auth) {
@@ -434,22 +542,77 @@
       }
     });
 
+    // --- ФОРМАТИРОВАНИЕ ТЕКСТА (ЖИРНЫЙ, ШРИФТ, РАЗМЕР, ЦВЕТ, МАРКЕР) ---
+    function formatDoc(cmd, value = null) {
+      const editor = document.getElementById('visualEditor');
+      editor.focus();
+      document.execCommand('styleWithCSS', false, true);
+      document.execCommand(cmd, false, value);
+      handleInput();
+    }
+
+    function changeFontFamily(fontName) {
+      const editor = document.getElementById('visualEditor');
+      editor.focus();
+      const sel = window.getSelection();
+      if (sel && !sel.isCollapsed) {
+        document.execCommand('styleWithCSS', false, true);
+        document.execCommand('fontName', false, fontName);
+      } else {
+        // Если ничего не выделено, меняем шрифт всей заметки
+        editor.style.fontFamily = fontName;
+      }
+      handleInput();
+    }
+
+    function highlightText(bgColor, textColor) {
+      const editor = document.getElementById('visualEditor');
+      editor.focus();
+      document.execCommand('styleWithCSS', false, true);
+      document.execCommand('hiliteColor', false, bgColor);
+      if (textColor && bgColor !== 'transparent') {
+        document.execCommand('foreColor', false, textColor);
+      }
+      document.getElementById('floatingToolbar').classList.add('hidden');
+      handleInput();
+    }
+
+    // Всплывающее меню над выделенным текстом
+    function initFloatingSelectionMenu() {
+      const floating = document.getElementById('floatingToolbar');
+      const editor = document.getElementById('visualEditor');
+
+      document.addEventListener('selectionchange', () => {
+        const sel = window.getSelection();
+        if (!sel || sel.isCollapsed || !editor.contains(sel.anchorNode)) {
+          floating.classList.add('hidden');
+          return;
+        }
+
+        const range = sel.getRangeAt(0);
+        const rect = range.getBoundingClientRect();
+        if (rect.width > 5) {
+          floating.classList.remove('hidden');
+          const top = Math.max(10, rect.top - 48);
+          const left = Math.min(window.innerWidth - 260, Math.max(10, rect.left + rect.width / 2 - 110));
+          floating.style.top = `${top}px`;
+          floating.style.left = `${left}px`;
+        }
+      });
+    }
+
     // --- ЭКСПОРТ В MICROSOFT WORD (.DOC) ---
     function exportToWord() {
       const note = notes.find(n => n.id === currentId);
       if (!note) return alert('Сначала выберите заметку!');
 
-      // Конвертируем Markdown в чистый HTML для Word
-      const cleanMd = (note.content || '').replace(/```mermaid([\s\S]*?)```/g, '<p><em>[Диаграмма: $1]</em></p>');
-      const htmlBody = marked.parse(cleanMd);
+      const htmlBody = document.getElementById('visualEditor').innerHTML;
 
-      // Добавляем прикрепленные картинки в конец документа Word
       let imagesHtml = '';
       if (note.attachments && note.attachments.length > 0) {
         imagesHtml = '<h3>Прикрепленные изображения:</h3>' + note.attachments.map(src => `<p><img src="${src}" style="max-width:500px; border-radius:8px;" /></p>`).join('');
       }
 
-      // Формируем полноценный документ с поддержкой кириллицы (UTF-8) и стилями таблиц для MS Word
       const wordTemplate = `
         <html xmlns:o='urn:schemas-microsoft-com:office:office' 
               xmlns:w='urn:schemas-microsoft-com:office:word' 
@@ -458,22 +621,21 @@
           <meta charset="utf-8">
           <title>${note.title || 'Заметка'}</title>
           <style>
-            body { font-family: 'Arial', sans-serif; font-size: 12pt; color: #1e293b; line-height: 1.5; }
-            h1 { font-size: 20pt; color: #312e81; margin-bottom: 10pt; }
-            h2 { font-size: 16pt; color: #4338ca; margin-top: 14pt; }
+            body { font-family: 'Arial', sans-serif; font-size: 12pt; color: #1e293b; line-height: 1.6; }
+            h1 { font-size: 20pt; color: #1e1b4b; margin-bottom: 10pt; }
+            h2 { font-size: 15pt; color: #4338ca; margin-top: 14pt; margin-bottom: 6pt; }
             h3 { font-size: 13pt; color: #4f46e5; }
             table { border-collapse: collapse; width: 100%; margin: 12pt 0; }
-            th, td { border: 1px solid #94a3b8; padding: 6pt 10pt; text-align: left; }
+            th, td { border: 1px solid #94a3b8; padding: 8pt 10pt; text-align: left; }
             th { background-color: #eef2ff; font-weight: bold; }
-            blockquote { border-left: 4px solid #6366f1; padding-left: 10pt; color: #475569; font-style: italic; }
-            code, pre { font-family: 'Courier New', monospace; background-color: #f1f5f9; padding: 4pt; }
-            .tags { font-size: 10pt; color: #6366f1; margin-bottom: 15pt; }
+            .tags { font-size: 10pt; color: #6366f1; margin-bottom: 14pt; }
           </style>
         </head>
         <body>
           <h1>${note.title || 'Без названия'}</h1>
           ${note.tags && note.tags.length ? `<div class="tags">Теги: #${note.tags.join(' #')}</div>` : ''}
-          <div>${htmlBody}</div>${imagesHtml}
+          <div>${htmlBody}</div>
+          ${imagesHtml}
         </body>
         </html>
       `;
@@ -482,30 +644,19 @@
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `${(note.title || 'Заметка').replace(/[\\/:*?"<>|]/g, '_')}.doc`;
+      link.download = `${(note.title || 'Документ').replace(/[\\/:*?"<>|]/g, '_')}.doc`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
     }
 
-    // --- ЭКСПОРТ В MARKDOWN (.MD) ---
-    function exportToMd() {
-      const note = notes.find(n => n.id === currentId);
-      if (!note) return;
-      const blob = new Blob([note.content], { type: 'text/markdown;charset=utf-8' });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = `${note.title || 'note'}.md`;
-      a.click();
-    }
-
     // --- СИНХРОНИЗАЦИЯ ---
     function setupRealtimeSync(uid) {
-      document.getElementById('syncStatus').innerHTML = `<span class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span><span>Облако синхронизировано</span>`;
+      document.getElementById('syncStatus').innerHTML = `<span class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span><span>Облако подключено</span>`;
       db.collection('users').doc(uid).collection('notes').onSnapshot(snap => {
         if (!snap.empty) {
           notes = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-          localStorage.setItem('aura_v3_notes', JSON.stringify(notes));
+          localStorage.setItem('aura_v5_notes', JSON.stringify(notes));
           renderTags();
           renderNotesList();
           loadActiveNote();
@@ -520,7 +671,7 @@
     }
 
     function saveLocal() {
-      localStorage.setItem('aura_v3_notes', JSON.stringify(notes));
+      localStorage.setItem('aura_v5_notes', JSON.stringify(notes));
       renderTags();
       renderNotesList();
       calcStats();
@@ -543,12 +694,19 @@
       syncNote(note);
     }
 
+    function stripHtml(html) {
+      const tmp = document.createElement('div');
+      tmp.innerHTML = html || '';
+      return tmp.textContent || tmp.innerText || '';
+    }
+
     // --- СПИСОК ЗАМЕТОК ---
     function renderNotesList() {
       const container = document.getElementById('notesContainer');
       const filtered = notes.filter(n => {
+        const plainText = stripHtml(n.content);
         const matchesTag = currentTag === 'all' || (n.tags && n.tags.includes(currentTag));
-        const matchesSearch = (n.title || '').toLowerCase().includes(searchQuery.toLowerCase()) || (n.content || '').toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesSearch = (n.title || '').toLowerCase().includes(searchQuery.toLowerCase()) || plainText.toLowerCase().includes(searchQuery.toLowerCase());
         return matchesTag && matchesSearch;
       }).sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0) || new Date(b.updatedAt) - new Date(a.updatedAt));
 
@@ -557,9 +715,10 @@
       container.innerHTML = filtered.map(note => {
         const cStyle = colorStyles[note.color || 'default'];
         const hasImg = note.attachments && note.attachments.length > 0;
+        const plainPreview = stripHtml(note.content).trim();
         return `
         <div onclick="selectNote('${note.id}')" 
-             class="p-3.5 rounded-2xl cursor-pointer transition-all border ${cStyle}${note.id === currentId ? 'ring-2 ring-indigo-500 shadow-sm' : 'hover:border-slate-300 dark:hover:border-slate-700'}">
+             class="p-3.5 rounded-2xl cursor-pointer transition-all border ${cStyle} ${note.id === currentId ? 'ring-2 ring-indigo-500 shadow-sm' : 'hover:border-slate-300 dark:hover:border-slate-700'}">
           <div class="flex items-center justify-between">
             <h4 class="font-bold text-sm truncate flex-1">${note.title || 'Без названия'}</h4>
             <div class="flex items-center gap-1">
@@ -569,7 +728,7 @@
             </div>
           </div>
           <p class="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 mt-1">
-            ${note.locked ? '🔒 Защищено паролем' : ((note.content || '').replace(/[#*`|]/g, '') || 'Пустая заметка...')}
+            ${note.locked ? '🔒 Защищено паролем' : (plainPreview || 'Пустая заметка...')}
           </p>
         </div>
       `}).join('');
@@ -601,81 +760,39 @@
 
     function loadActiveNote() {
       const note = notes.find(n => n.id === currentId);
-      if (!note) return;
+      const editor = document.getElementById('visualEditor');
+      if (!note) {
+        document.getElementById('noteTitle').value = '';
+        editor.innerHTML = '';
+        document.getElementById('noteTags').value = '';
+        return;
+      }
 
       document.getElementById('noteTitle').value = note.title || '';
-      document.getElementById('noteContent').value = note.content || '';
+      editor.innerHTML = note.content || '';
       document.getElementById('noteTags').value = (note.tags || []).join(', ');
 
       renderAttachments(note);
       calcStats();
-      updatePreview();
+      mermaid.run({ querySelector: '.mermaid' }).catch(() => {});
     }
 
     function handleInput() {
       const note = notes.find(n => n.id === currentId);
       if (!note) return;
       note.title = document.getElementById('noteTitle').value;
-      note.content = document.getElementById('noteContent').value;
+      note.content = document.getElementById('visualEditor').innerHTML;
       note.tags = document.getElementById('noteTags').value.split(',').map(t => t.trim().toLowerCase()).filter(Boolean);
       note.updatedAt = new Date().toISOString();
       saveLocal();
       syncNote(note);
-      updatePreview();
     }
 
     document.getElementById('noteTitle').addEventListener('input', handleInput);
-    document.getElementById('noteContent').addEventListener('input', handleInput);
+    document.getElementById('visualEditor').addEventListener('input', handleInput);
     document.getElementById('noteTags').addEventListener('input', handleInput);
 
-    // --- РЕНДЕР MARKDOWN + MERMAID ДИАГРАММ ---
-    async function updatePreview() {
-      const raw = document.getElementById('noteContent').value || '*Пусто...*';
-      const previewArea = document.getElementById('previewArea');
-
-      const processed = raw.replace(/```mermaid([\s\S]*?)```/g, '<div class="mermaid">$1</div>');
-      previewArea.innerHTML = marked.parse(processed);
-
-      try {
-        await mermaid.run({ querySelector: '.mermaid' });
-      } catch (e) {}
-    }
-
-    // --- РЕЖИМЫ ОТОБРАЖЕНИЯ (ТЕКСТ / 2 ОКНА / ПРЕВЬЮ) ---
-    const noteContent = document.getElementById('noteContent');
-    const previewArea = document.getElementById('previewArea');
-    const tabEdit = document.getElementById('tabEdit');
-    const tabSplit = document.getElementById('tabSplit');
-    const tabPreview = document.getElementById('tabPreview');
-
-    function setViewMode(mode) {
-      [tabEdit, tabSplit, tabPreview].forEach(b => {
-        b.classList.remove('bg-white', 'dark:bg-slate-700', 'shadow-sm');
-        b.classList.add('text-slate-500');
-      });
-
-      if (mode === 'edit') {
-        tabEdit.classList.add('bg-white', 'dark:bg-slate-700', 'shadow-sm');
-        noteContent.classList.remove('hidden');
-        previewArea.classList.add('hidden');
-      } else if (mode === 'split') {
-        tabSplit.classList.add('bg-white', 'dark:bg-slate-700', 'shadow-sm');
-        noteContent.classList.remove('hidden');
-        previewArea.classList.remove('hidden');
-        updatePreview();
-      } else if (mode === 'preview') {
-        tabPreview.classList.add('bg-white', 'dark:bg-slate-700', 'shadow-sm');
-        noteContent.classList.add('hidden');
-        previewArea.classList.remove('hidden');
-        updatePreview();
-      }
-    }
-
-    tabEdit.addEventListener('click', () => setViewMode('edit'));
-    tabSplit.addEventListener('click', () => setViewMode('split'));
-    tabPreview.addEventListener('click', () => setViewMode('preview'));
-
-    // --- 1. ВСТАВКА ТАБЛИЦ ---
+    // --- 1. ВСТАВКА ТАБЛИЦЫ ---
     function openTableModal() { document.getElementById('tableModal').classList.remove('hidden'); }
     function closeTableModal() { document.getElementById('tableModal').classList.add('hidden'); }
 
@@ -683,40 +800,38 @@
       const cols = parseInt(document.getElementById('tableCols').value) || 3;
       const rows = parseInt(document.getElementById('tableRows').value) || 3;
       
-      let md = '\n| ' + Array(cols).fill('Заголовок').map((h, i) => `${h} ${i+1}`).join(' | ') + ' |\n';
-      md += '| ' + Array(cols).fill(':---').join(' | ') + ' |\n';
-      for (let r = 0; r < rows; r++) {
-        md += '| ' + Array(cols).fill('Ячейка').join(' | ') + ' |\n';
+      let html = '<table><thead><tr>';
+      for (let c = 1; c <= cols; c++) html += `<th>Заголовок ${c}</th>`;
+      html += '</tr></thead><tbody>';
+      for (let r = 1; r <= rows; r++) {
+        html += '<tr>';
+        for (let c = 1; c <= cols; c++) html += `<td>Ячейка</td>`;
+        html += '</tr>';
       }
+      html += '</tbody></table><p><br></p>';
 
-      const textarea = document.getElementById('noteContent');
-      textarea.value += '\n' + md;
+      document.getElementById('visualEditor').innerHTML += html;
       closeTableModal();
       handleInput();
-      setViewMode(window.innerWidth >= 1024 ? 'split' : 'preview');
     }
 
-    // --- 2. ВСТАВКА ДИАГРАММ ---
+    // --- 2. ВСТАВКА ДИАГРАММЫ ---
     function openChartModal() { document.getElementById('chartModal').classList.remove('hidden'); }
     function closeChartModal() { document.getElementById('chartModal').classList.add('hidden'); }
 
-    function insertChart(type) {
-      let code = '';
-      if (type === 'pie') {
-        code = `\n\`\`\`mermaid\npie title Статистика проекта\n    "Готово" : 60\n    "В работе" : 25\n    "Тестирование" : 15\n\`\`\`\n`;
-      } else if (type === 'flow') {
-        code = `\n\`\`\`mermaid\ngraph TD\n    A[Старт] --> B{Решение}\n    B -->|Да| C[Результат 1]\n    B -->|Нет| D[Результат 2]\n\`\`\`\n`;
-      } else if (type === 'mindmap') {
-        code = `\n\`\`\`mermaid\nsequenceDiagram\n    Клиент->>Сервер: Запрос данных\n    Сервер-->>База: Поиск заметок\n    База-->>Клиент: Мгновенный ответ\n\`\`\`\n`;
-      }
+    async function insertChart(type) {
+      let graphDef = type === 'pie' 
+        ? `pie title Распределение ресурсов\n    "Разработка" : 50\n    "Дизайн" : 30\n    "Маркетинг" : 20`
+        : `graph LR\n    A[Идея] --> B(Прототип)\n    B --> C{Проверка}\n    C -->|Готово| D[Запуск!]`;
 
-      document.getElementById('noteContent').value += code;
+      const id = 'mermaidChart_' + Date.now();
+      document.getElementById('visualEditor').innerHTML += `<div class="chart-box" contenteditable="false"><div class="mermaid" id="${id}">${graphDef}</div></div><p><br></p>`;
       closeChartModal();
+      await mermaid.run({ querySelector: `#${id}` }).catch(console.error);
       handleInput();
-      setViewMode(window.innerWidth >= 1024 ? 'split' : 'preview');
     }
 
-    // --- 3. ПРИКРЕПЛЕНИЕ И СЖАТИЕ КАРТИНОК ---
+    // --- 3. КАРТИНКИ ---
     document.getElementById('imageUploadInput').addEventListener('change', (e) => {
       const file = e.target.files[0];
       if (!file) return;
@@ -732,9 +847,7 @@
           canvas.height = img.height * scale;
           const ctx = canvas.getContext('2d');
           ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-          const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.8);
-          addAttachmentToNote(compressedDataUrl);
+          addAttachmentToNote(canvas.toDataURL('image/jpeg', 0.82));
         };
         img.src = ev.target.result;
       };
@@ -784,7 +897,7 @@
       document.getElementById('lightbox').classList.remove('hidden');
     }
 
-    // --- 4. СКЕТЧПАД (РИСОВАНИЕ ОТ РУКИ) ---
+    // --- 4. СКЕТЧПАД ---
     let sketchCanvas, sketchCtx, isDrawing = false;
 
     function initSketchpad() {
@@ -822,12 +935,11 @@
       sketchCtx.fillRect(0, 0, sketchCanvas.width, sketchCanvas.height);
     }
     function saveSketch() {
-      const dataUrl = sketchCanvas.toDataURL('image/png');
-      addAttachmentToNote(dataUrl);
+      addAttachmentToNote(sketchCanvas.toDataURL('image/png'));
       closeSketchModal();
     }
 
-    // --- 5. ПОМОДОРО И ГОЛОСОВОЙ ВВОД ---
+    // --- 5. ПОМОДОРО И ГОЛОС ---
     let pomoInterval = null, pomoSeconds = 25 * 60;
     document.getElementById('pomoToggle').addEventListener('click', (e) => {
       if (pomoInterval) {
@@ -843,7 +955,7 @@
           document.getElementById('pomoTime').textContent = `${m}:${s}`;
           if (pomoSeconds <= 0) {
             clearInterval(pomoInterval);
-            alert('🎉 Сессия фокуса завершена!');
+            alert('🎉 Время фокуса завершено!');
             pomoSeconds = 25 * 60;
           }
         }, 1000);
@@ -852,45 +964,37 @@
 
     document.getElementById('voiceBtn').addEventListener('click', () => {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (!SpeechRecognition) return alert('Ваш браузер не поддерживает голосовой ввод (используйте Chrome).');
+      if (!SpeechRecognition) return alert('Используйте Google Chrome для голосового ввода.');
       const recognition = new SpeechRecognition();
       recognition.lang = 'ru-RU';
       recognition.onresult = (event) => {
         const transcript = event.results[0][0].transcript;
-        document.getElementById('noteContent').value += ' ' + transcript;
+        document.getElementById('visualEditor').innerHTML += `<p>${transcript}</p>`;
         handleInput();
       };
       recognition.start();
     });
 
-    function aiSummarize() {
-      const note = notes.find(n => n.id === currentId);
-      if (!note) return;
-      note.content += `\n\n### ✨ План действий (Aura AI):\n- [ ] Проверить ключевые метрики в таблице\n- [ ] Обновить диаграмму прогресса\n- [ ] Выгрузить итоговый отчет в Word (.doc)`;
-      document.getElementById('noteContent').value = note.content;
-      handleInput();
-    }
-
     // --- БАЗОВЫЕ КНОПКИ ---
     function calcStats() {
-      const text = document.getElementById('noteContent').value || '';
-      const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+      const plain = stripHtml(document.getElementById('visualEditor').innerHTML).trim();
+      const words = plain ? plain.split(/\s+/).length : 0;
       document.getElementById('statsWords').textContent = `${words} слов`;
-      document.getElementById('statsChars').textContent = `${text.length} симв.`;
+      document.getElementById('statsChars').textContent = `${plain.length} симв.`;
     }
 
     document.getElementById('createNoteBtn').addEventListener('click', () => {
-      const newNote = { id: String(Date.now()), title: '', content: '', tags: [], pinned: false, locked: false, color: 'default', attachments: [], updatedAt: new Date().toISOString() };
+      const newNote = { id: String(Date.now()), title: '', content: '<p>Начните вводить текст...</p>', tags: [], pinned: false, locked: false, color: 'default', attachments: [], updatedAt: new Date().toISOString() };
       notes.unshift(newNote);
       currentId = newNote.id;
       saveLocal();
       syncNote(newNote);
       loadActiveNote();
-      setViewMode('edit');
+      document.getElementById('noteTitle').focus();
     });
 
     document.getElementById('deleteNote').addEventListener('click', () => {
-      if (!currentId || !confirm('Удалить заметку?')) return;
+      if (!currentId || !confirm('Удалить эту заметку?')) return;
       notes = notes.filter(n => n.id !== currentId);
       currentId = notes[0]?.id || null;
       saveLocal();
@@ -923,7 +1027,6 @@
       document.getElementById('editorWrapper').classList.add('hidden');
     });
 
-    // Модалка входа
     const authModal = document.getElementById('authModal');
     document.getElementById('authModalBtn').addEventListener('click', () => authModal.classList.remove('hidden'));
     document.getElementById('closeAuthModal').addEventListener('click', () => authModal.classList.add('hidden'));
