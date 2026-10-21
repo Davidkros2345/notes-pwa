@@ -142,7 +142,7 @@
             <div id="userAvatar" class="w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center overflow-hidden">
               <i data-lucide="user" class="w-3.5 h-3.5 text-slate-500"></i>
             </div>
-            <span id="userName" class="truncate max-w-[70px]">Войти</span>
+            <span id="userName" class="truncate max-w-[85px]">Войти</span>
           </button>
         </div>
       </div>
@@ -173,7 +173,7 @@
       <div class="p-3.5 border-t border-slate-200/60 dark:border-slate-800/60 flex items-center justify-between text-xs text-slate-400 flex-shrink-0">
         <div class="flex items-center gap-1.5" id="syncStatus">
           <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-          <span>Автосохранение активно</span>
+          <span>Локальное автосохранение</span>
         </div>
         <span id="notesCount">0 заметок</span>
       </div>
@@ -228,7 +228,7 @@
         </div>
       </header>
 
-      <!-- ПАНЕЛЬ РЕДАКТИРОВАНИЯ ТЕКСТА (ШРИФТЫ, РАЗМЕР, ЦВЕТ, ВЫДЕЛЕНИЕ МАРКЕРОМ, ВЫРАВНИВАНИЕ) -->
+      <!-- ПАНЕЛЬ РЕДАКТИРОВАНИЯ ТЕКСТА -->
       <div onmousedown="if(event.target.tagName !== 'SELECT' && event.target.tagName !== 'INPUT') event.preventDefault()" 
            class="px-6 py-2 bg-slate-50/90 dark:bg-slate-900/70 border-b border-slate-200/70 dark:border-slate-800/80 flex flex-wrap items-center gap-1.5 text-xs font-semibold flex-shrink-0">
         
@@ -253,7 +253,7 @@
 
         <span class="h-4 w-[1px] bg-slate-300 dark:bg-slate-700 mx-0.5"></span>
 
-        <!-- Начертание: Жирный, Курсив, Подчеркнутый, Зачеркнутый -->
+        <!-- Начертание -->
         <button onclick="formatDoc('bold')" class="p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800" title="Жирный (Ctrl+B)">
           <i data-lucide="bold" class="w-4 h-4"></i>
         </button>
@@ -276,7 +276,7 @@
           <input type="color" onchange="formatDoc('foreColor', this.value)" value="#6366f1" class="w-4 h-4 border-0 bg-transparent cursor-pointer p-0">
         </label>
 
-        <!-- Выделение маркером (Фон текста) -->
+        <!-- Выделение маркером -->
         <div class="flex items-center gap-1 px-2 py-1 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700" title="Выделить текст маркером">
           <i data-lucide="highlighter" class="w-3.5 h-3.5 text-amber-500 mr-0.5"></i>
           <button onclick="highlightText('#fef08a', '#1e293b')" class="w-3.5 h-3.5 rounded-full bg-yellow-300 border border-slate-400/30" title="Желтый маркер"></button>
@@ -427,22 +427,28 @@
   <!-- Модальное окно Авторизации -->
   <div id="authModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
     <div class="bg-white dark:bg-[#0c1222] border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-sm p-6 shadow-2xl relative">
-      <button id="closeAuthModal" class="absolute right-4 top-4 text-slate-400"><i data-lucide="x" class="w-5 h-5"></i></button>
+      <button id="closeAuthModal" class="absolute right-4 top-4 text-slate-400 hover:text-slate-200"><i data-lucide="x" class="w-5 h-5"></i></button>
       <div class="text-center mb-6">
         <h3 class="text-lg font-bold">Синхронизация аккаунта</h3>
         <p class="text-xs text-slate-400 mt-1">Доступ к заметкам на компьютере и телефоне</p>
       </div>
       <div id="authActions" class="space-y-3">
-        <button id="loginGoogle" class="w-full py-2.5 px-4 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 font-semibold text-xs flex items-center justify-center gap-2">
-          Войти через Google
-        </button>
-        <button id="loginFacebook" class="w-full py-2.5 px-4 rounded-xl bg-[#1877F2] text-white font-semibold text-xs flex items-center justify-center gap-2">
-          Войти через Facebook
+        <button id="loginGoogle" class="w-full py-2.5 px-4 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 font-semibold text-xs flex items-center justify-center gap-2.5 transition active:scale-95">
+          <svg class="w-4 h-4" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
+            <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.11-6.72-4.96H1.29v3.14C3.26 21.3 7.31 24 12 24z"/>
+            <path fill="#FBBC05" d="M5.28 14.24c-.24-.72-.38-1.49-.38-2.24s.14-1.52.38-2.24V6.62H1.29C.47 8.24 0 10.06 0 12s.47 3.76 1.29 5.38l3.99-3.14z"/>
+            <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.7 1.29 6.62l3.99 3.14c.95-2.85 3.6-4.96 6.72-4.96z"/>
+          </svg>
+          <span>Войти через Google</span>
         </button>
       </div>
       <div id="userInfo" class="hidden text-center space-y-4">
-        <p class="text-xs">Аккаунт: <span id="userEmail" class="text-indigo-500 font-bold"></span></p>
-        <button id="logoutBtn" class="w-full py-2 rounded-xl border border-rose-200 text-rose-500 text-xs font-bold">Выйти</button>
+        <div class="flex flex-col items-center gap-2">
+          <img id="modalUserPhoto" src="" alt="" referrerpolicy="no-referrer" class="w-12 h-12 rounded-full border-2 border-indigo-500 hidden">
+          <p class="text-xs">Аккаунт: <span id="userEmail" class="text-indigo-500 font-bold block mt-0.5"></span></p>
+        </div>
+        <button id="logoutBtn" class="w-full py-2 rounded-xl border border-rose-500/30 hover:bg-rose-500/10 text-rose-500 text-xs font-bold transition">Выйти из аккаунта</button>
       </div>
     </div>
   </div>
@@ -450,23 +456,27 @@
   <script>
     mermaid.initialize({ startOnLoad: false, theme: 'dark' });
 
-    // --- КОНФИГУРАЦИЯ FIREBASE ---
+    // --- ВАША КОНФИГУРАЦИЯ FIREBASE (notes-sync-4e0e7) ---
     const firebaseConfig = {
-      apiKey: "YOUR_API_KEY",
-      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-      projectId: "YOUR_PROJECT_ID",
-      storageBucket: "YOUR_PROJECT_ID.appspot.com",
-      messagingSenderId: "YOUR_SENDER_ID",
-      appId: "YOUR_APP_ID"
+      apiKey: "AIzaSyDWzCYHUuGUEPqvIbDJ3MqZGXPUIi0bgFY",
+      authDomain: "notes-sync-4e0e7.firebaseapp.com",
+      projectId: "notes-sync-4e0e7",
+      storageBucket: "notes-sync-4e0e7.firebasestorage.app",
+      messagingSenderId: "370867877487",
+      appId: "1:370867877487:web:4136c6f8365c9a87a2ff9a",
+      measurementId: "G-SZT7KTHG2S"
     };
 
-    let auth = null, db = null, currentUser = null;
-    const isConfigured = firebaseConfig.apiKey !== "YOUR_API_KEY";
+    let auth = null, db = null, currentUser = null, unsubscribeSync = null;
 
-    if (isConfigured) {
+    try {
       firebase.initializeApp(firebaseConfig);
       auth = firebase.auth();
       db = firebase.firestore();
+      // Включаем офлайн-кэширование Firestore
+      db.enablePersistence({ synchronizeTabs: true }).catch(() => {});
+    } catch (e) {
+      console.error("Ошибка инициализации Firebase:", e);
     }
 
     // --- СТАРТОВАЯ ЗАМЕТКА С ПРИМЕРАМИ ВЫДЕЛЕНИЯ И ШРИФТОВ ---
@@ -533,16 +543,48 @@
       initFloatingSelectionMenu();
       lucide.createIcons();
 
-      if (isConfigured && auth) {
-        auth.onAuthStateChanged(user => {
+      if (auth) {
+        auth.onAuthStateChanged(async (user) => {
           currentUser = user;
           updateAuthUI(user);
-          if (user) setupRealtimeSync(user.uid);
+          if (user) {
+            await setupRealtimeSync(user.uid);
+          } else {
+            if (unsubscribeSync) {
+              unsubscribeSync();
+              unsubscribeSync = null;
+            }
+            document.getElementById('syncStatus').innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500"></span><span>Локальное автосохранение</span>`;
+          }
         });
       }
     });
 
-    // --- ФОРМАТИРОВАНИЕ ТЕКСТА (ЖИРНЫЙ, ШРИФТ, РАЗМЕР, ЦВЕТ, МАРКЕР) ---
+    // --- ОБРАБОТЧИКИ ВХОДА ЧЕРЕЗ GOOGLE И ВЫХОДА ---
+    document.getElementById('loginGoogle').addEventListener('click', async () => {
+      if (!auth) return alert('Firebase не инициализирован');
+      const provider = new firebase.auth.GoogleAuthProvider();
+      provider.setCustomParameters({ prompt: 'select_account' });
+      try {
+        await auth.signInWithPopup(provider);
+        document.getElementById('authModal').classList.add('hidden');
+      } catch (err) {
+        console.error('Ошибка входа через Google:', err);
+        if (err.code === 'auth/unauthorized-domain') {
+          alert('Домен не разрешен в Firebase! Добавьте адрес вашего сайта в раздел Authentication -> Settings -> Authorized domains.');
+        } else if (err.code !== 'auth/popup-closed-by-user') {
+          alert('Ошибка входа: ' + err.message);
+        }
+      }
+    });
+
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      if (!auth) return;
+      await auth.signOut();
+      document.getElementById('authModal').classList.add('hidden');
+    });
+
+    // --- ФОРМАТИРОВАНИЕ ТЕКСТА ---
     function formatDoc(cmd, value = null) {
       const editor = document.getElementById('visualEditor');
       editor.focus();
@@ -559,7 +601,6 @@
         document.execCommand('styleWithCSS', false, true);
         document.execCommand('fontName', false, fontName);
       } else {
-        // Если ничего не выделено, меняем шрифт всей заметки
         editor.style.fontFamily = fontName;
       }
       handleInput();
@@ -577,7 +618,6 @@
       handleInput();
     }
 
-    // Всплывающее меню над выделенным текстом
     function initFloatingSelectionMenu() {
       const floating = document.getElementById('floatingToolbar');
       const editor = document.getElementById('visualEditor');
@@ -650,23 +690,51 @@
       document.body.removeChild(link);
     }
 
-    // --- СИНХРОНИЗАЦИЯ ---
-    function setupRealtimeSync(uid) {
+    // --- ОБЛАЧНАЯ СИНХРОНИЗАЦИЯ С FIRESTORE ---
+    async function setupRealtimeSync(uid) {
       document.getElementById('syncStatus').innerHTML = `<span class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span><span>Облако подключено</span>`;
-      db.collection('users').doc(uid).collection('notes').onSnapshot(snap => {
+      const userNotesRef = db.collection('users').doc(uid).collection('notes');
+
+      // Если в облаке пусто, выгружаем туда текущие локальные заметки
+      try {
+        const initialSnap = await userNotesRef.get();
+        if (initialSnap.empty && notes.length > 0) {
+          for (const localNote of notes) {
+            await userNotesRef.doc(String(localNote.id)).set(localNote);
+          }
+        }
+      } catch (e) {
+        console.warn("Ожидание правил доступа Firestore:", e);
+      }
+
+      if (unsubscribeSync) unsubscribeSync();
+
+      unsubscribeSync = userNotesRef.onSnapshot(snap => {
         if (!snap.empty) {
           notes = snap.docs.map(d => ({ id: d.id, ...d.data() }));
           localStorage.setItem('aura_v5_notes', JSON.stringify(notes));
           renderTags();
           renderNotesList();
-          loadActiveNote();
+
+          // Обновляем текст в редакторе только если пользователь сейчас сам не печатает в нем
+          const activeEl = document.activeElement;
+          const isTyping = activeEl && (activeEl.id === 'visualEditor' || activeEl.id === 'noteTitle' || activeEl.id === 'noteTags');
+          if (!isTyping) {
+            if (!notes.some(n => n.id === currentId)) {
+              currentId = notes[0]?.id || null;
+            }
+            loadActiveNote();
+          }
         }
+      }, err => {
+        console.error("Ошибка синхронизации Firestore:", err);
+        document.getElementById('syncStatus').innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-500"></span><span>Проверьте Rules в Firebase</span>`;
       });
     }
 
     async function syncNote(note) {
       if (currentUser && db) {
-        await db.collection('users').doc(currentUser.uid).collection('notes').doc(note.id).set(note).catch(console.error);
+        await db.collection('users').doc(currentUser.uid).collection('notes').doc(String(note.id)).set(note).catch(console.error);
       }
     }
 
@@ -993,12 +1061,16 @@
       document.getElementById('noteTitle').focus();
     });
 
-    document.getElementById('deleteNote').addEventListener('click', () => {
+    document.getElementById('deleteNote').addEventListener('click', async () => {
       if (!currentId || !confirm('Удалить эту заметку?')) return;
-      notes = notes.filter(n => n.id !== currentId);
+      const idToDelete = currentId;
+      notes = notes.filter(n => n.id !== idToDelete);
       currentId = notes[0]?.id || null;
       saveLocal();
       loadActiveNote();
+      if (currentUser && db) {
+        await db.collection('users').doc(currentUser.uid).collection('notes').doc(String(idToDelete)).delete().catch(console.error);
+      }
     });
 
     document.getElementById('pinToggle').addEventListener('click', () => {
@@ -1032,10 +1104,24 @@
     document.getElementById('closeAuthModal').addEventListener('click', () => authModal.classList.add('hidden'));
 
     function updateAuthUI(user) {
+      const avatarContainer = document.getElementById('userAvatar');
+      const modalPhoto = document.getElementById('modalUserPhoto');
       document.getElementById('userName').textContent = user ? (user.displayName?.split(' ')[0] || 'Профиль') : 'Войти';
       document.getElementById('authActions').classList.toggle('hidden', Boolean(user));
       document.getElementById('userInfo').classList.toggle('hidden', !user);
-      if (user) document.getElementById('userEmail').textContent = user.email;
+
+      if (user) {
+        document.getElementById('userEmail').textContent = user.email;
+        if (user.photoURL) {
+          avatarContainer.innerHTML = `<img src="${user.photoURL}" referrerpolicy="no-referrer" class="w-full h-full object-cover">`;
+          modalPhoto.src = user.photoURL;
+          modalPhoto.classList.remove('hidden');
+        }
+      } else {
+        avatarContainer.innerHTML = `<i data-lucide="user" class="w-3.5 h-3.5 text-slate-500"></i>`;
+        modalPhoto.classList.add('hidden');
+        lucide.createIcons();
+      }
     }
   </script>
 </body>
